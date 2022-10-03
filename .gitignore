@@ -1,0 +1,27 @@
+*.pot~
+*.po~
+dist
+bower_components
+node_modules
+npm-debug.log
+vendor
+sftp-config.json
+sftp-config-alt.json
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+!.vscode/sftp-template.json
+
+# Local History for Visual Studio Code
+.history/
+._*
+
+
+# Docker folders n files
+db
+wordpress
+.env

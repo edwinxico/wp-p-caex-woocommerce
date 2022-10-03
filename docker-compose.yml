@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+
+  wordpress:
+    container_name: ${PROJECT_NAME:-wordpress}_wp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER:-exampleuser}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-examplepass}
+      WORDPRESS_DB_NAME: ${DB_NAME:-exampledb}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-true}
+      WORDPRESS_DEBUG_LOG: ${WORDPRESS_DEBUG_LOG:-true}
+      WORDPRESS_DEBUG_DISPLAY: ${WORDPRESS_DEBUG_DISPLAY:-false}
+    volumes:
+      - ./:/var/www/html/wp-content/plugins/wp-p-${PROJECT_NAME:-wordpress}
+  db:
+    image: mariadb
+    container_name: ${PROJECT_NAME:-wordpress}_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-exampledb}
+      MYSQL_USER: ${DB_USER:-exampleuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-examplepass}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - ./db:/var/lib/mysql
