@@ -42,7 +42,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
 	require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/caex.php' );
 
-	if( $caex_api_key = get_option('caex_api_key') ) {
+	if( true ) { //$caex_api_key = get_option('caex_api_key') ) {
 		require_once( trailingslashit( dirname( __FILE__ ) ) . 'inc/autoloader.php' );
 		require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/wp-filters.php');
 		require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/wp-actions.php');
