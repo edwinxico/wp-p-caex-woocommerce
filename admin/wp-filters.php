@@ -41,7 +41,7 @@ function dl_adon_plugin_template( $template, $template_name, $template_path ) {
      if ( ! $template_path ) 
         $template_path = $woocommerce->template_url;
  
-     $plugin_path  =  INFILE_API_PLUGIN_PATH . 'woocommerce/';
+     $plugin_path  =  CAEX_API_PLUGIN_PATH . 'woocommerce/';
  
     // Look within passed path within the theme - this is priority
     $template = locate_template(

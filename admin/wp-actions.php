@@ -17,15 +17,25 @@ function dl_wc_add_order_meta_box_action( $actions ) {
 
 	$caex_last_action = get_post_meta( $theorder->get_id() , '_caex_last_action', true );
 
+    $enable_caex = true;
+
+    foreach( $theorder->get_items( 'shipping' ) as $item_id => $item ) {
+        $item_data = $item->get_data();
+        $shipping_data_method_id = $item_data['method_id'];
+        if( $shipping_data_method_id == "local_pickup" ) {
+            $enable_caex = false;
+        }
+    }
+
 	// add "mark printed" custom action
-	if( !get_post_meta( $theorder->get_id(), '_wc_order_caex_dte', true ) || $caex_last_action == 'invoice_cancelled' ) {
-		$actions['wc_caex_request_invoice'] = 'Caex | ' . __( 'Request Invoice', 'wp-caex-woocommerce' );
-	} else {
-		$actions['wc_caex_send_invoice_to_client'] = 'Caex | ' . __( 'Send Invoice to client', 'wp-caex-woocommerce' );
-		$actions['wc_caex_cancel_invoice'] = 'Caex | ' . __( 'Cancel previosly generated Invoice', 'wp-caex-woocommerce' );
-	}
-
-
+    if( $enable_caex ) {
+        if( !get_post_meta( $theorder->get_id(), '_wc_order_caex_dte', true ) || $caex_last_action == 'invoice_cancelled' ) {
+            $actions['wc_caex_request_invoice'] = 'Caex | ' . __( 'Generate tracking ID', 'wp-caex-woocommerce' );
+        } else {
+            $actions['wc_caex_send_invoice_to_client'] = 'Caex | ' . __( 'Send tracking ID to client', 'wp-caex-woocommerce' );
+            $actions['wc_caex_cancel_invoice'] = 'Caex | ' . __( 'Cancel previosly generated tracking ID', 'wp-caex-woocommerce' );
+        }
+    }
 
 	return $actions;
 }
