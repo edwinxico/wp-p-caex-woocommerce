@@ -130,5 +130,17 @@ add_action( 'woocommerce_order_action_wc_caex_send_invoice_to_client', __NAMESPA
 
 
 
+// Adding admin js script for ajax synchronization of states
+function dl_wc_caex_admin_scripts() {
+	wp_enqueue_script( 'dl_wc_caex_admin_script', CAEX_API_PLUGIN_URL . 'dist/assets/js/admin.min.js', array( 'jquery' ), '1.0.0', true );
+	wp_localize_script( 'dl_wc_caex_admin_script', 'dl_wc_caex_admin_script', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' ),
+		'nonce' => wp_create_nonce( 'dl_wc_caex_admin_script' ),
+	) );
+}
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\dl_wc_caex_admin_scripts' );
+
+
+
 
 

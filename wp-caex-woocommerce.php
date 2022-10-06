@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) {
 defined( 'ABSPATH' ) or exit;
 // Make sure WooCommerce is active
 
-if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) && in_array( 'wc-guatemala/wc-guatemala-departamentos-y-ciudades.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 
 	require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/caex.php' );
 
@@ -83,8 +83,8 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'dl_p_caex_act
 function dl_p_caex_add_error_notice() {
     ?>
     <div class="notice notice-error is-dismissible">
-        <p><?php _e( 'Cargo Expreso - WooCommerce Invoicing requires WooCommerce to work', 'wp-caex-woocommerce' ); ?></p>
-    </div>
+        <p><?php _e( 'Cargo Expreso - WooCommerce Invoicing requires WooCommerce and <a href="/wp-admin/plugin-install.php?tab=plugin-information&plugin=wc-guatemala">WooCommerce Guateamala</a> to work', 'wp-caex-woocommerce' ); ?></p>
+</div>
     <?php
 }
 

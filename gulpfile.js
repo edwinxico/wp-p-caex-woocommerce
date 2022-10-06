@@ -23,14 +23,14 @@ function admin_css() {
 }
 */
 
-function js() {
-  return src('./assets/js/*.js', { sourcemaps: true })
-    .pipe(concat('app.min.js'))
+function admin_js() {
+  return src('./assets/js/admin/*.js', { sourcemaps: true })
+    .pipe(concat('admin.min.js'))
     .pipe(dest('dist/assets/js', { sourcemaps: true }))
 }
 
-function js_prod() {
-  return src('./assets/js/*.js', { sourcemaps: true })
+function admin_js_prod() {
+  return src('./assets/js/admin/*.js', { sourcemaps: true })
     .pipe( stripdebug() )
     .pipe(concat('app.min.js'))
     .pipe(dest('dist/assets/js', { sourcemaps: true }))
@@ -54,10 +54,11 @@ function move() {
 
 exports.clean_dist = clean_dist;
 exports.move = move;
-exports.js = js;
+exports.admin_js = admin_js;
+exports.admin_js_prod = admin_js_prod;
 // exports.client_css = client_css;
 // exports.admin_css = admin_css;
 // exports.css = parallel(client_css);
 exports.clean = parallel(clean_dist);
-exports.production = parallel(js_prod, move);
-exports.default = parallel(js, move);
+exports.production = parallel(admin_js_prod, move);
+exports.default = parallel(admin_js, move);

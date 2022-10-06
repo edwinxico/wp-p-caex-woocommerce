@@ -87,6 +87,14 @@ class Caex_Settings
             'caex-api', 
             'caex_api_section_credentials'
         );  
+
+        add_settings_field(
+            'locations_sync_date', 
+            'Locations Last Update Date', 
+            array( $this, 'locations_sync_date_callback' ), 
+            'caex-api', 
+            'caex_api_section_credentials'
+        );  
         
         add_settings_section(
             'caex_api_section_store_info', // ID
@@ -151,6 +159,9 @@ class Caex_Settings
 
         if( isset( $input['password'] ) )
             $new_input['password'] = sanitize_text_field( $input['password'] );
+
+        if( isset( $input['locations_sync_date'] ) )
+            $new_input['locations_sync_date'] = sanitize_text_field( $input['locations_sync_date'] );
         
         if( isset( $input['phone'] ) )
             $new_input['phone'] = sanitize_text_field( $input['phone'] );
@@ -166,6 +177,7 @@ class Caex_Settings
 
         if( isset( $input['formato_impresion'] ) )
             $new_input['formato_impresion'] = sanitize_text_field( $input['formato_impresion'] );
+
 
         return $new_input;
     }
@@ -195,6 +207,17 @@ class Caex_Settings
             '<input type="text" id="password" name="caex_api_credentials[password]" value="%s" />',
             isset( $this->options['password'] ) ? esc_attr( $this->options['password']) : ''
         );
+    }
+
+    /** 
+     * Get the settings option array and print one of its values
+     */
+    public function locations_sync_date_callback() {
+        printf(
+            '<input type="text" id="locations_sync_date" name="caex_api_credentials[locations_sync_date]" value="%s" disabled />',
+            isset( $this->options['locations_sync_date'] ) ? esc_attr( $this->options['locations_sync_date']) : ''
+        );
+        echo "<button class=\"btn-caex-sync\">Sync Now</button>";
     }
 
     /** 
