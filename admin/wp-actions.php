@@ -142,5 +142,51 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\dl_wc_caex_admin_scripts
 
 
 
+function dl_wc_caex_sync_locations() {
+    // Check for nonce security
+	error_log("Llamada ajax para sinc locations");
+    $nonce = sanitize_text_field( $_POST['nonce'] );
+    if ( ! wp_verify_nonce( $nonce, 'dl_wc_caex_admin_script' ) ) {
+        die ( 'Busted!');
+    }
+	$response = array(
+		"result" => false,
+		"message" => "Error al sincronizar localidades"
+	);
+	
+	$caexApi = new Helpers\Caex_Api();
+	$Logger = new Util\Logger('caex-woocommerce');
+	$Logger->log("iniciando sincronización caex");
+    $caexApi_states = $caexApi->getStatesList();
+	$caexApi_municipalities = $caexApi->getMunicipalitiesList();
+	$caexApi_towns = $caexApi->getTownsList();
+
+	// TODO, agregar columna a tabla de estados y agregar codigo caex
+	// TODO, agregar columna a tabla de municipios y agregar codigo caex
+	// TODO, agregar columna a tabla de localidades y agregar codigo caex
+
+	// TODO, elimimnar todas las filas de las tablas que notenga codigo caex
+
+	$Logger->log("caexApi_municipalities" . print_r( $caexApi_towns, true ) );
+
+	$response['data'] = $caexApi_states;
+	
+/*
+	$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE table_name = 'wp_customer_say' AND column_name = 'say_state'"  );
+	if(empty($row)){
+   		$wpdb->query("ALTER TABLE wp_customer_say ADD say_state INT(1) NOT NULL DEFAULT 1");
+	}
+*/
+
+
+    echo json_encode( $response );
+    wp_die();
+}
+add_action( 'wp_ajax_nopriv_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_locations' );
+add_action( 'wp_ajax_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_locations' );
+
+
+
 
 

@@ -218,6 +218,7 @@ class Caex_Settings
             isset( $this->options['locations_sync_date'] ) ? esc_attr( $this->options['locations_sync_date']) : ''
         );
         echo "<button class=\"btn-caex-sync\">Sync Now</button>";
+        echo "<div class=\"wc-caex-sync-result\"></div>";
     }
 
     /** 

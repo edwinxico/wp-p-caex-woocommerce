@@ -6,7 +6,7 @@ use caex_woocommerce\Admin\Util;
 
 class Caex_Helper {
 
-	function __construct() {
+	function __construct( ) {
 		$this->logger = new Util\Logger('dl-caex-api');
 		$this->debub_mode = false;
 		if( defined('CAEX_API_DEBUG_MODE') ) {
@@ -105,10 +105,47 @@ class Caex_Helper {
                 </ser:GenerarGuia>
             </soapenv:Body>
         </soapenv:Envelope>";
-
-        $this->logger->log( "xml: " . $request_xml );
         return $request_xml;
 
+    }
+
+    public function generate_states_requext( $caex_settings ) {
+        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
+        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
+        <soapenv:Header/>
+            <soapenv:Body>
+                <ser:ObtenerListadoDepartamentos>\n"
+                    . $this->get_xml_authentication_section( $caex_settings ) . "
+                </ser:ObtenerListadoDepartamentos>
+            </soapenv:Body>
+        </soapenv:Envelope>";
+        return $request_xml;
+    }
+
+    public function generate_municipalities_requext( $caex_settings ) {
+        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
+        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
+        <soapenv:Header/>
+            <soapenv:Body>
+                <ser:ObtenerListadoMunicipios>\n"
+                    . $this->get_xml_authentication_section( $caex_settings ) . "
+                </ser:ObtenerListadoMunicipios>
+            </soapenv:Body>
+        </soapenv:Envelope>";
+        return $request_xml;
+    }
+
+    public function generate_towns_requext( $caex_settings ) {
+        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
+        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
+        <soapenv:Header/>
+            <soapenv:Body>
+                <ser:ObtenerListadoPoblados>\n"
+                    . $this->get_xml_authentication_section( $caex_settings ) . "
+                </ser:ObtenerListadoPoblados>
+            </soapenv:Body>
+        </soapenv:Envelope>";
+        return $request_xml;
     }
 
     public function getCaexTransactionId( $order ) {
