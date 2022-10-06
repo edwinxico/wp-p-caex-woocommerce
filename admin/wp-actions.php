@@ -26,11 +26,12 @@ function dl_wc_add_order_meta_box_action( $actions ) {
             $enable_caex = false;
         }
     }
+	$actions['wc_caex_request_tracking'] = 'Caex | ' . __( 'Generate tracking ID', 'wp-caex-woocommerce' );
 
 	// add "mark printed" custom action
     if( $enable_caex ) {
-        if( !get_post_meta( $theorder->get_id(), '_wc_order_caex_dte', true ) || $caex_last_action == 'invoice_cancelled' ) {
-            $actions['wc_caex_request_invoice'] = 'Caex | ' . __( 'Generate tracking ID', 'wp-caex-woocommerce' );
+        if( !get_post_meta( $theorder->get_id(), '_wc_order_caex_tracking', true ) || $caex_last_action == 'invoice_cancelled' ) {
+            $actions['wc_caex_request_tracking'] = 'Caex | ' . __( 'Generate tracking ID', 'wp-caex-woocommerce' );
         } else {
             $actions['wc_caex_send_invoice_to_client'] = 'Caex | ' . __( 'Send tracking ID to client', 'wp-caex-woocommerce' );
             $actions['wc_caex_cancel_invoice'] = 'Caex | ' . __( 'Cancel previosly generated tracking ID', 'wp-caex-woocommerce' );
@@ -49,18 +50,18 @@ add_action( 'woocommerce_order_actions', __NAMESPACE__ . '\\dl_wc_add_order_meta
  *
  * @param \WC_Order $order
  */
-function dl_wc_process_order_meta_box_request_invoice_action( $order ) {
+function dl_wc_process_order_meta_box_request_tracking_action( $order ) {
     $caexApi = new Helpers\Caex_Api();
 	$Logger = new Util\Logger('caex-woocommerce');
-	$Logger->log("caex-woocommerce: Requesting invoice for order: " . $order->get_id() );
-    $invoice_response = $caexApi->requestInvoice($order);
+	$Logger->log("caex-woocommerce: Requesting tracking id for order: " . $order->get_id() );
+    $invoice_response = $caexApi->requestTracking($order);
     if( !$invoice_response['result'] ) {
         // error ,agregar nota al pedido sobre la razón del error
         $order->add_order_note( $invoice_response['message'] );
         return;
     }
 	// exito, agregar datos de invoice a la órden
-	add_post_meta( $order->get_id(), '_wc_order_caex_dte', json_encode( $invoice_response['dte'] ) );
+	add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['dte'] ) );
 	if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
 		update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested' );
 	} else {
@@ -69,7 +70,7 @@ function dl_wc_process_order_meta_box_request_invoice_action( $order ) {
 	$message = sprintf( __( 'Invoice from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
 	$order->add_order_note( $message );
 }
-add_action( 'woocommerce_order_action_wc_caex_request_invoice', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_invoice_action' );
+add_action( 'woocommerce_order_action_wc_caex_request_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action' );
 
 /**
  * Cancel invoice from inflie service
