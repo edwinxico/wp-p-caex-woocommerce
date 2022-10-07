@@ -72,26 +72,29 @@ class Caex_Api {
 		$xml_request = $this->caex_helper->generate_tracking_requext( $order, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
+		if ( $this->debub_mode ) {
+			$this->logger->log( "xml enviado: " . $xml_request );
+			$this->logger->log( "respuesta servicio: "  . print_r( $api_response, true) );
+		}
+
 		// Hacer llamada a api para
 		try {
-			$response['tracking_data'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion'];
+			$response['result'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['ResultadoExitoso'];
+			$response['result'] = filter_var( $response['result'], FILTER_VALIDATE_BOOLEAN);
+			if( $response['result'] ) {
+				$this->logger->log('Resultado exitoso.');
+				$response['tracking_data'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion'];
+			} else {
+				$this->logger->log("Resultaod falso, error");
+				$response['message'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['MensajeError'];
+				$response['response_code'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['CodigoRespuesta'];
+				$this->logger->log("Error: " . $response['message']);
+			}
 		} catch (Exception $e) {
 			$response['result'] = false;
 			$response['message'] = 'Error al obtener la lista de departamentos';
 		}
 		// obtener y devolver respuesta
-		if ( $this->debub_mode ) {
-			$this->logger->log( "xml enviado: " . $xml_request );
-			$this->logger->log( "respuesta servicio: "  . print_r( $api_response, true) );
-		}
-        $response['dte'] = array(
-            'uuid' 			=> "",
-            'serie' 		=> "",
-            'numero' 		=> "",
-			'issued_date' 	=> "",
-			'cert_date'		=> "",
-			'nit' 			=> "",
-        );
         return $response;
         // generar objetos para la orden
     }

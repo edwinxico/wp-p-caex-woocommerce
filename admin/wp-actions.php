@@ -57,7 +57,7 @@ function dl_wc_process_order_meta_box_request_tracking_action( $order ) {
     $invoice_response = $caexApi->requestTracking($order);
     if( !$invoice_response['result'] ) {
         // error ,agregar nota al pedido sobre la razón del error
-        $order->add_order_note( $invoice_response['message'] );
+        $order->add_order_note( "Error CAEX:" . $invoice_response['response_code'] . " - " . $invoice_response['message'] );
         return;
     }
 	// exito, agregar datos de invoice a la órden
