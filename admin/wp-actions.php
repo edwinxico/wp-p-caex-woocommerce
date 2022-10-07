@@ -171,6 +171,15 @@ function dl_wc_caex_sync_locations() {
 	
 	global $wpdb;
 
+
+	global $wpdb;
+	$mysql_now = $wpdb->get_results( 'SELECT DATE_SUB(NOW(), INTERVAL 1 MINUTE);', 'ARRAY_A' );
+	
+	$caex_api_credentials = get_option('caex_api_credentials');
+	$caex_api_credentials['locations_sync_date'] = array_values( $mysql_now[0] )[0] ;			
+	update_option('caex_api_credentials', $caex_api_credentials);
+
+
 	$row = $wpdb->get_results(  "SHOW COLUMNS FROM `{$wpdb->prefix}dl_wc_gt_departamento` LIKE 'codigo_caex_departamento';" );
 	if(empty($row)){
    		$wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_departamento ADD codigo_caex_departamento varchar(6) NOT NULL DEFAULT '00'");
