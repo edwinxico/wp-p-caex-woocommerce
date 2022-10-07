@@ -61,13 +61,13 @@ function dl_wc_process_order_meta_box_request_tracking_action( $order ) {
         return;
     }
 	// exito, agregar datos de invoice a la órden
-	add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['dte'] ) );
+	add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['tracking_data'] ) );
 	if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
 		update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested' );
 	} else {
 		add_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested', true );
 	}
-	$message = sprintf( __( 'Invoice from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
+	$message = sprintf( __( 'Tracking ID from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
 	$order->add_order_note( $message );
 }
 add_action( 'woocommerce_order_action_wc_caex_request_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action' );
@@ -89,7 +89,7 @@ function dl_wc_process_order_meta_box_cancel_invoice_action( $order ) {
         return;
     }
 
-	add_post_meta( $order->get_id(), '_wc_order_caex_cancelled_invoices', json_encode( $invoice_response['dte'] ) );
+	add_post_meta( $order->get_id(), '_wc_order_caex_cancelled_trackings', json_encode( $invoice_response['dte'] ) );
 	if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
 		update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_cancelled' );
 	} else {
@@ -300,6 +300,48 @@ function misha_editable_order_meta_billing( $order ){
 				) );
 			?>
 		</div>
+	<?php
+	
+	$caex_dte = get_post_meta( $order->get_id() , '_wc_order_caex_tracking' );
+	$caex_last_action = get_post_meta( $order->get_id() , '_caex_last_action', true );
+	?>
+		<div class="address">
+			<p<?php if( ! $caex_dte ) { echo ' class="none_set"'; } ?>>
+				<h3><?php _e('CAEX Tracking Id Information', 'wp-caex-woocommerce') ?></h3>
+				<?php
+
+                if( !$caex_dte || $caex_last_action == 'invoice_cancelled'  ) {
+                    _e("No Infile invoice requested yet.", true);   
+                } else {
+					$caex_dte = json_decode( $caex_dte[count($caex_dte)-1], true );
+					$caex_recollection_id = get_post_meta( $order->get_id(), 'caex_transaction_id_pretty', true);
+					echo '<p><strong>' . __('RecolleccionID', 'wp-caex-woocommerce') . ':</strong> <a href="' . $caex_dte['URLRecoleccion'] . '">' . $caex_recollection_id . '</a></p>';
+					echo '<p><strong> ' . __('NumeroGuia', 'wp-caex-woocommerce') . ':</strong> <a href="' . $caex_dte['URLConsulta'] . '">' . $caex_dte['NumeroGuia'] . '</a></p>';
+					echo '<p><strong>' . __('MontoTarifa', 'wp-caex-woocommerce') . ':</strong> ' . $caex_dte['MontoTarifa'] . '</p>';
+					echo '<p><strong>' . __('NumeroPieza' , 'wp-caex-woocommerce') . ':</strong>' . $caex_dte['NumeroPieza'] . '</p>';
+                }
+                ?>
+			</p>
+		</div>
+		<?php
+			$caex_cancelled_dtes = get_post_meta( $order->get_id() , '_wc_order_caex_cancelled_trackings' );
+			if( $caex_cancelled_dtes ) {
+				?>
+		<div class="address">
+			<p<?php if( ! $caex_dte ) { echo ' class="none_set"'; } ?>>
+				<h3><?php _e('Cancelled Tracking IDs', 'wp-caex-woocommerce') ?></h3>
+				<?php
+				$caex_cancelled_dte_index = 1;
+				foreach( $caex_cancelled_dtes as $caex_cancelled_dte ) {
+					$caex_cancelled_dte = json_decode( $caex_cancelled_dte, true );
+                    echo '<p>( ' . $caex_cancelled_dte_index++ .' ) <a href="https://report.feel.com.gt/ingfacereport/ingfacereport_documento?uuid=' . $caex_cancelled_dte['uuid'] . '" target="_blank">' . $caex_cancelled_dte['uuid'] . '</a></p>';
+				}
+                ?>
+			</p>
+		</div>
+		<?php
+			}
+		?>
 	<?php
 }
 add_action( 'woocommerce_admin_order_data_after_shipping_address', __NAMESPACE__ . '\\misha_editable_order_meta_billing' );

@@ -73,7 +73,12 @@ class Caex_Api {
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
 		// Hacer llamada a api para
-
+		try {
+			$response['tracking_data'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion'];
+		} catch (Exception $e) {
+			$response['result'] = false;
+			$response['message'] = 'Error al obtener la lista de departamentos';
+		}
 		// obtener y devolver respuesta
 		if ( $this->debub_mode ) {
 			$this->logger->log( "xml enviado: " . $xml_request );
