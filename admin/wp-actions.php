@@ -167,17 +167,83 @@ function dl_wc_caex_sync_locations() {
 
 	// TODO, elimimnar todas las filas de las tablas que notenga codigo caex
 
-	$Logger->log("caexApi_municipalities" . print_r( $caexApi_towns, true ) );
+	$Logger->log("Validando si las tablas ya cuentan con las columnas, sino agregarlas" );
 
 	$response['data'] = $caexApi_states;
 	
-/*
+
 	$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-	WHERE table_name = 'wp_customer_say' AND column_name = 'say_state'"  );
+	WHERE table_name = {$wpdb->prefix}dl_wc_gt_departamento AND column_name = codigo_caex_departamento"  );
 	if(empty($row)){
-   		$wpdb->query("ALTER TABLE wp_customer_say ADD say_state INT(1) NOT NULL DEFAULT 1");
+   		$wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_departamento ADD codigo_caex_departamento INT(4) NOT NULL DEFAULT 00");
 	}
-*/
+
+	$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE table_name = {$wpdb->prefix}dl_wc_gt_municipio AND column_name = codigo_caex_municipio"  );
+	if(empty($row)){
+   		$wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_municipio ADD codigo_caex_municipio INT(4) NOT NULL DEFAULT 00");
+	}
+
+	$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE table_name = {$wpdb->prefix}dl_wc_gt_ciudad AND column_name = codigo_caex_ciudad"  );
+	if(empty($row)){
+   		$wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_ciudad ADD codigo_caex_ciudad INT(4) NOT NULL DEFAULT 00");
+	}
+
+	$Logger->log("Finalizó validación." );
+
+	$dl_wc_gt_states = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_departamento" );
+	$dl_wc_gt_municipalities = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_municipio" );
+	$dl_wc_gt_towns = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_ciudad" );
+
+	foreach($caexApi_states as $caex_state ) {
+		$caex_state_name = strtoupper( dl_strip_special_chars( $caex_state['Nombre'] ) );
+		foreach($dl_wc_gt_states as $dl_wc_gt_state ) {
+			$dl_wc_gt_state_name = strtoupper( dl_strip_special_chars( $dl_wc_gt_state->nombre ) );
+			if( $caex_state_name == $dl_wc_gt_state_name ) {
+
+				// Si hace match, agregar caex_id al departamento
+				$wpdb->update( "{$wpdb->prefix}dl_wc_gt_departamento", array( 'codigo_caex_departamento' => $caex_state['Codigo'] ), array( 'id' => $dl_wc_gt_state->id ) );
+
+				// Buscar municipios del estado
+				$dl_wc_gt_municipalities = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_municipio WHERE departamento_id = {$dl_wc_gt_state->id}" );
+
+				foreach( $caexApi_municipalities as $caex_municipality ) {
+					$caex_municipality_name = strtoupper( dl_strip_special_chars( $caex_municipality['Nombre'] ) );
+					foreach($dl_wc_gt_municipalities as $dl_wc_gt_municipality ) {
+						$dl_wc_gt_municipality_name = strtoupper( dl_strip_special_chars( $dl_wc_gt_municipality->nombre ) );
+						if( $caex_municipality_name == $dl_wc_gt_municipality_name ) {
+
+							// Si hace match, agregar caex_id al municipio
+							$wpdb->update( "{$wpdb->prefix}dl_wc_gt_municipio", array( 'codigo_caex_municipio' => $caex_municipality['Codigo'] ), array( 'id' => $dl_wc_gt_municipality->id ) );
+
+							// Buscar localidades del municipio
+							$dl_wc_gt_towns = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_ciudad WHERE municipio_id = {$dl_wc_gt_municipality->id}" );
+
+							foreach( $caexApi_towns as $caex_town ) {
+								$caex_town_name = strtoupper( dl_strip_special_chars( $caex_town['Nombre'] ) );
+								foreach($dl_wc_gt_towns as $dl_wc_gt_town ) {
+									$dl_wc_gt_town_name = strtoupper( dl_strip_special_chars( $dl_wc_gt_town->nombre ) );
+									if( $caex_town_name == $dl_wc_gt_town_name ) {
+
+										// Si hace match, agregar caex_id a la localidad
+										$wpdb->update( "{$wpdb->prefix}dl_wc_gt_ciudad", array( 'codigo_caex_ciudad' => $caex_town['Codigo'] ), array( 'id' => $dl_wc_gt_town->id ) );
+
+									}
+
+									// TODO: Marcar que ciudades se encontraron, sino se encontraron entonces crear nueva entrada en tabla de poblados con los datos de caex API.
+								}
+							}
+
+
+							// TODO: Marcar qué municipalidades si se encontraron y cuales no, para los que no se encontraron crear una nueva entrada de municipio.
+
+						}
+					}
+				}
+			}
+		}
+	}
 
 
     echo json_encode( $response );
@@ -190,3 +256,46 @@ add_action( 'wp_ajax_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_lo
 
 
 
+function dl_strip_special_chars($cadena){
+		
+	$cadena = preg_replace('/\s+/', ' ', $cadena);
+	//Reemplazamos la A y a
+	$cadena = str_replace(
+	array('Á', 'À', 'Â', 'Ä', 'á', 'à', 'ä', 'â', 'ª'),
+	array('A', 'A', 'A', 'A', 'a', 'a', 'a', 'a', 'a'),
+	$cadena
+	);
+
+	//Reemplazamos la E y e
+	$cadena = str_replace(
+	array('É', 'È', 'Ê', 'Ë', 'é', 'è', 'ë', 'ê'),
+	array('E', 'E', 'E', 'E', 'e', 'e', 'e', 'e'),
+	$cadena );
+
+	//Reemplazamos la I y i
+	$cadena = str_replace(
+	array('Í', 'Ì', 'Ï', 'Î', 'í', 'ì', 'ï', 'î'),
+	array('I', 'I', 'I', 'I', 'i', 'i', 'i', 'i'),
+	$cadena );
+
+	//Reemplazamos la O y o
+	$cadena = str_replace(
+	array('Ó', 'Ò', 'Ö', 'Ô', 'ó', 'ò', 'ö', 'ô'),
+	array('O', 'O', 'O', 'O', 'o', 'o', 'o', 'o'),
+	$cadena );
+
+	//Reemplazamos la U y u
+	$cadena = str_replace(
+	array('Ú', 'Ù', 'Û', 'Ü', 'ú', 'ù', 'ü', 'û'),
+	array('U', 'U', 'U', 'U', 'u', 'u', 'u', 'u'),
+	$cadena );
+
+	//Reemplazamos la N, n, C y c
+	$cadena = str_replace(
+	array('Ñ', 'ñ', 'Ç', 'ç'),
+	array('N', 'n', 'C', 'c'),
+	$cadena
+	);
+	
+	return $cadena;
+}
