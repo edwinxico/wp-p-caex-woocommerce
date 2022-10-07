@@ -264,6 +264,53 @@ add_action( 'wp_ajax_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_lo
 
 
 
+function dl_save_caex_town_id( $order_id ) {
+	error_log("entering saving method");
+    $order = new \WC_Order( $order_id );
+	error_log("after creating order");
+    $order_shipping_postcode = $order->get_shipping_postcode();
+    global $wpdb;
+	error_log("before wppdb request");
+	$dl_wc_gt_town = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_ciudad WHERE codigo_postal_ciudad = {$order_shipping_postcode}" );
+	if( $dl_wc_gt_town ) {
+		error_log("town found, returned caex town id");
+		update_post_meta( $order_id, '_caex_town_id', $dl_wc_gt_town->codigo_caex_ciudad );
+	}
+}
+add_action( 'woocommerce_new_order', __NAMESPACE__ . '\\dl_save_caex_town_id', 1, 1 );
+
+function misha_editable_order_meta_billing( $order ){
+	$caex_town_id = get_post_meta( $order->get_id(), '_caex_town_id', true );
+    ?>
+		<div class="address">
+			<p<?php if( ! $caex_town_id ) { echo ' class="none_set"'; } ?>>
+				<strong>CAEX Destino:</strong>
+				<?php echo $caex_town_id ? esc_html( $caex_town_id ) : 'CAEX Town not set.' ?>
+			</p>
+		</div>
+		<div class="edit_address">
+			<?php
+				woocommerce_wp_text_input( array(
+					'id' => '_caex_town_id',
+					'label' => 'CAEX Codigo de Ciudad',
+                    'placeholder' => '00',
+					'wrapper_class' => 'form-field-wide',
+					'value' => $caex_town_id,
+					'description' => 'Código de acuerdo a catálogo de CAEX.',
+				) );
+			?>
+		</div>
+	<?php
+}
+add_action( 'woocommerce_admin_order_data_after_shipping_address', __NAMESPACE__ . '\\misha_editable_order_meta_billing' );
+
+function save_custom_shipping_fields( $order_id ) {
+    if ( isset( $_POST['_caex_town_id'] ) && ! empty( $_POST['_caex_town_id'] ) ) {
+        update_post_meta( $order_id, '_caex_town_id', sanitize_text_field( $_POST['_caex_town_id'] ) );
+    }
+}
+add_action( 'woocommerce_update_order', __NAMESPACE__ . '\\save_custom_shipping_fields' );
+
 
 function dl_strip_special_chars($cadena){
 		

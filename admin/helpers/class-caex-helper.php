@@ -43,7 +43,9 @@ class Caex_Helper {
                             <ser:DestinatarioTelefono>" . $order->get_billing_phone() . "</ser:DestinatarioTelefono>
                             <ser:DestinatarioContacto>" . $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() . "</ser:DestinatarioContacto>
                             <ser:DestinatarioNIT>" . get_post_meta( $order->get_id(), '_billing_nit', true ) . "</ser:DestinatarioNIT>
-                            <ser:CodigoPobladoDestino>string</ser:CodigoPobladoDestino>
+                            <ser:ReferenciaCliente1></ser:ReferenciaCliente1>
+                            <ser:ReferenciaCliente2></ser:ReferenciaCliente2>
+                            <ser:CodigoPobladoDestino>" . get_post_meta( $order->get_id(), '_caex_town_id', true ) . "</ser:CodigoPobladoDestino>
                             <ser:Observaciones>" . $order->get_customer_note() . "</ser:Observaciones>
                             <ser:CodigoReferencia>" . get_current_user_id() . "</ser:CodigoReferencia>
                             \n";
@@ -61,6 +63,7 @@ class Caex_Helper {
                             <ser:Piezas>\n";
         $pieza_counter = 1;
         foreach ( $order->get_items() as $order_item_key => $order_item ) {
+            $product_variation_id = $order_item['variation_id'];
             if ($product_variation_id) { 
                 $product = wc_get_product($order_item['variation_id']);
             } else {

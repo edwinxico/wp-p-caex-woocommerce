@@ -69,14 +69,15 @@ class Caex_Api {
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_requext = $this->caex_helper->generate_tracking_requext( $order, $this->caex_settings );
-
+		$xml_request = $this->caex_helper->generate_tracking_requext( $order, $this->caex_settings );
+		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
+		$api_response = $this->get_response_body($api_response);
 		// Hacer llamada a api para
 
 		// obtener y devolver respuesta
 		if ( $this->debub_mode ) {
-			$this->logger->log( "xml enviado: "  );
-			$this->logger->log( "respuesta servicio: " );
+			$this->logger->log( "xml enviado: " . $xml_request );
+			$this->logger->log( "respuesta servicio: "  . print_r( $api_response, true) );
 		}
         $response['dte'] = array(
             'uuid' 			=> "",
