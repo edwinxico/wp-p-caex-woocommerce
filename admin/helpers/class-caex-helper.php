@@ -43,7 +43,7 @@ class Caex_Helper {
                             <ser:DestinatarioTelefono>" . $order->get_billing_phone() . "</ser:DestinatarioTelefono>
                             <ser:DestinatarioContacto>" . $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() . "</ser:DestinatarioContacto>
                             <ser:DestinatarioNIT>" . get_post_meta( $order->get_id(), '_billing_nit', true ) . "</ser:DestinatarioNIT>
-                            <ser:ReferenciaCliente1></ser:ReferenciaCliente1>
+                            <ser:ReferenciaCliente1> Orden: #" . $order->get_id() . " </ser:ReferenciaCliente1>
                             <ser:ReferenciaCliente2></ser:ReferenciaCliente2>
                             <ser:CodigoPobladoDestino>" . get_post_meta( $order->get_id(), '_caex_town_id', true ) . "</ser:CodigoPobladoDestino>
                             <ser:Observaciones>" . $order->get_customer_note() . "</ser:Observaciones>
