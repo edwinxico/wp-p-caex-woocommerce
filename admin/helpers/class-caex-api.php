@@ -20,6 +20,9 @@ class Caex_Api {
 	}
 
 	function send_curl_request( $xml_request, $soap_action ) {
+		if ( $this->debub_mode ) {
+			$this->logger->log( "xml enviado: " . $xml_request );
+		}
 		$curl = curl_init();
 		curl_setopt_array($curl, array(
 			CURLOPT_URL => 'http://ws.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx',
@@ -39,6 +42,12 @@ class Caex_Api {
 
 		$response = curl_exec($curl);
 		curl_close($curl);
+		if ( $this->debub_mode ) {
+			$this->logger->log( "respuesta servicio: "  . print_r( $response, true) );
+		}
+		if( empty( $response ) ) {
+			return false;
+		}
 		return  $response;
 	}
 
@@ -47,6 +56,11 @@ class Caex_Api {
 		$xml = new \SimpleXMLElement($response);
 		$body = $xml->xpath('//soapBody')[0];
 		$array = json_decode(json_encode((array)$body), TRUE); 
+		if( isset( $array['AnularGuiaResponse']['AnularGuiaResult']['AnularGuia'] ) ) {
+			$xml = simplexml_load_string($array['AnularGuiaResponse']['AnularGuiaResult']['AnularGuia'], "SimpleXMLElement", LIBXML_NOCDATA);
+			$json = json_encode($xml);
+			$array['AnularGuiaResponse']['AnularGuiaResult']['AnularGuia'] = json_decode($json,TRUE);
+		}
 		return  $array;
 	}
 
@@ -69,26 +83,18 @@ class Caex_Api {
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_request = $this->caex_helper->generate_tracking_requext( $order, $this->caex_settings );
+		$xml_request = $this->caex_helper->generate_tracking_request( $order, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
-		if ( $this->debub_mode ) {
-			$this->logger->log( "xml enviado: " . $xml_request );
-			$this->logger->log( "respuesta servicio: "  . print_r( $api_response, true) );
-		}
-
 		// Hacer llamada a api para
 		try {
 			$response['result'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['ResultadoExitoso'];
 			$response['result'] = filter_var( $response['result'], FILTER_VALIDATE_BOOLEAN);
 			if( $response['result'] ) {
-				$this->logger->log('Resultado exitoso.');
 				$response['tracking_data'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion'];
 			} else {
-				$this->logger->log("Resultaod falso, error");
 				$response['message'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['MensajeError'];
 				$response['response_code'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['CodigoRespuesta'];
-				$this->logger->log("Error: " . $response['message']);
 			}
 		} catch (Exception $e) {
 			$response['result'] = false;
@@ -99,8 +105,31 @@ class Caex_Api {
         // generar objetos para la orden
     }
 
-	public function cancelInvoice( $order ) {
-		return $response;
+	public function cancelTracking( $caex_tracking_to_cancel ) {
+		$response['result'] = true;
+        $response['message'] = "Solicitud exitosa";
+
+		// crear objeto para llamada del helper del
+		$xml_request = $this->caex_helper->cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
+		$api_response = $this->send_curl_request( $xml_request, 'AnularGuia' );
+		$api_response = $this->get_response_body($api_response);
+		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
+		// Hacer llamada a api para
+		try {
+			$response['result'] = $api_response['AnularGuiaResponse']['AnularGuiaResult']['AnularGuia']['Resultado']; 
+			$response['result'] = filter_var( $response['result'], FILTER_VALIDATE_BOOLEAN);			
+			if( $response['result'] ) {
+				$response['tracking_data'] = $caex_tracking_to_cancel;
+			} else {
+				$response['message'] = $api_response['AnularGuiaResponse']['AnularGuiaResult']['AnularGuia']['Mensaje'];
+			}
+		} catch (Exception $e) {
+			$response['result'] = false;
+			$response['message'] = 'Error al obtener la lista de departamentos';
+		}
+		// obtener y devolver respuesta
+        return $response;
+        // generar objetos para la orden
 	}
 
 	public function getStatesList() {

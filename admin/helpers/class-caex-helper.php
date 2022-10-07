@@ -84,7 +84,7 @@ class Caex_Helper {
         return $request_xml;
     }
 
-    public function generate_tracking_requext( $order, $caex_settings ) {
+    public function generate_tracking_request( $order, $caex_settings ) {
         $tipoEntrega = 1;
         $fechaRecoleccion = "
                             <ser:FechaRecoleccion>" . date('Y-m-d')  . "</ser:FechaRecoleccion>"; // yyyy-mm-dd
@@ -109,7 +109,22 @@ class Caex_Helper {
             </soapenv:Body>
         </soapenv:Envelope>";
         return $request_xml;
+    }
 
+    public function cancel_tracking_request( $caex_tracking_to_cancel, $caex_settings ) {
+        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
+        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
+        <soapenv:Header/>
+            <soapenv:Body>
+                <ser:AnularGuia>\n"
+                    . $this->get_xml_authentication_section( $caex_settings ) . 
+                    "
+                    <ser:NumeroGuia>" . $caex_tracking_to_cancel['NumeroGuia'] . "</ser:NumeroGuia>
+                    <ser:CodigoCredito>" . $caex_settings['codigo_credito'] . "</ser:CodigoCredito>
+                </ser:AnularGuia>
+            </soapenv:Body>
+        </soapenv:Envelope>";
+        return $request_xml;
     }
 
     public function generate_states_requext( $caex_settings ) {
