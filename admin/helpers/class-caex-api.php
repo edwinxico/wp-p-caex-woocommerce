@@ -19,13 +19,16 @@ class Caex_Api {
 
 	}
 
-	function send_curl_request( $xml_request, $soap_action ) {
+	function send_curl_request( $xml_request, $soap_action, $url = null ) {
 		if ( $this->debub_mode ) {
 			$this->logger->log( "xml enviado: " . $xml_request );
 		}
+		if( $url == null ) {
+			$url = $this->url;
+		}
 		$curl = curl_init();
 		curl_setopt_array($curl, array(
-			CURLOPT_URL => 'http://ws.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx',
+			CURLOPT_URL => $url,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_ENCODING => '',
 			CURLOPT_MAXREDIRS => 10,
@@ -111,7 +114,7 @@ class Caex_Api {
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_request = $this->caex_helper->cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
+		$xml_request = $this->caex_helper->generate_cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'AnularGuia' );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
@@ -123,6 +126,34 @@ class Caex_Api {
 				$response['tracking_data'] = $caex_tracking_to_cancel;
 			} else {
 				$response['message'] = $api_response['AnularGuiaResponse']['AnularGuiaResult']['AnularGuia']['Mensaje'];
+			}
+		} catch (Exception $e) {
+			$response['result'] = false;
+			$response['message'] = 'Error al obtener la lista de departamentos';
+		}
+		// obtener y devolver respuesta
+        return $response;
+        // generar objetos para la orden
+	}
+
+	public function updateTrackingStatus( $caex_tracking_to_update ) {
+		$response['result'] = true;
+        $response['message'] = "Solicitud exitosa";
+
+		// crear objeto para llamada del helper del
+		$url = "https://tracking.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx";
+		$xml_request = $this->caex_helper->generate_update_tracking_request( $caex_tracking_to_update, $this->caex_settings );
+		$api_response = $this->send_curl_request( $xml_request, 'ObtenerTrackingGuia', $url );
+		$api_response = $this->get_response_body($api_response);
+		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
+		// Hacer llamada a api para
+		try {
+			$response['result'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso']; 
+			$response['result'] = filter_var( $response['result'], FILTER_VALIDATE_BOOLEAN);			
+			if( $response['result'] ) {
+				$response['tracking_status'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['DatosGuia']['PODStatusDes'];
+			} else {
+				$response['message'] = print_r( $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['MensajeError'], true);
 			}
 		} catch (Exception $e) {
 			$response['result'] = false;

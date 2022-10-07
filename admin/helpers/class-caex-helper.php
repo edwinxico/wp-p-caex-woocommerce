@@ -110,7 +110,7 @@ class Caex_Helper {
         return $request_xml;
     }
 
-    public function cancel_tracking_request( $caex_tracking_to_cancel, $caex_settings ) {
+    public function generate_cancel_tracking_request( $caex_tracking_to_cancel, $caex_settings ) {
         $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
         xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
         <soapenv:Header/>
@@ -121,6 +121,21 @@ class Caex_Helper {
                     <ser:NumeroGuia>" . $caex_tracking_to_cancel['NumeroGuia'] . "</ser:NumeroGuia>
                     <ser:CodigoCredito>" . $caex_settings['codigo_credito'] . "</ser:CodigoCredito>
                 </ser:AnularGuia>
+            </soapenv:Body>
+        </soapenv:Envelope>";
+        return $request_xml;
+    }
+
+    public function generate_update_tracking_request( $caex_tracking_to_update, $caex_settings ) {
+        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
+        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
+        <soapenv:Header/>
+            <soapenv:Body>
+                <ser:ObtenerTrackingGuia>\n"
+                    . $this->get_xml_authentication_section( $caex_settings ) . 
+                    "
+                    <ser:NumeroGuia>" . $caex_tracking_to_update['NumeroGuia'] . "</ser:NumeroGuia>
+                </ser:ObtenerTrackingGuia>
             </soapenv:Body>
         </soapenv:Envelope>";
         return $request_xml;

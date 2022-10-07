@@ -29,6 +29,7 @@ function dl_wc_add_order_meta_box_action( $actions ) {
         if( !get_post_meta( $theorder->get_id(), '_wc_order_caex_tracking', true ) || $caex_last_action == 'invoice_cancelled' ) {
             $actions['wc_caex_request_tracking'] = 'Caex | ' . __( 'Generate tracking ID', 'wp-caex-woocommerce' );
         } else {
+			$actions['wc_caex_update_tracking_status'] = 'Caex | ' . __( 'Update tracking ID status', 'wp-caex-woocommerce' );
             $actions['wc_caex_send_invoice_to_client'] = 'Caex | ' . __( 'Send tracking ID to client', 'wp-caex-woocommerce' );
             $actions['wc_caex_cancel_tracking'] = 'Caex | ' . __( 'Cancel previosly generated tracking ID', 'wp-caex-woocommerce' );
         }
@@ -100,6 +101,28 @@ function dl_wc_process_order_meta_box_cancel_tracking_action( $order ) {
 	$order->add_order_note( $message );
 }
 add_action( 'woocommerce_order_action_wc_caex_cancel_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_cancel_tracking_action' );
+
+
+function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
+	$Logger = new Util\Logger('dl-caex');
+    $caexApi = new Helpers\Caex_Api();
+
+	$caex_tracking_to_update = get_post_meta( $order->get_id(), '_wc_order_caex_tracking' );
+	$caex_tracking_to_update = json_decode( $caex_tracking_to_update[count($caex_tracking_to_update)-1], true );
+
+    $invoice_response = $caexApi->updateTrackingStatus($caex_tracking_to_update);
+    if( !$invoice_response['result'] ) {
+        // error ,agregar nota al pedido sobre la razón del error
+        $order->add_order_note( $invoice_response['message'] );
+        return;
+    }
+
+	update_post_meta( $order->get_id(), '_wc_order_caex_tracking_status', $invoice_response['tracking_status'] );
+	
+	$message = sprintf( __( 'Invoice status update requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
+	$order->add_order_note( $message );
+}
+add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_update_tracking_status_action' );
 
 /**
  * Send invoice from inflie service
@@ -320,8 +343,12 @@ function misha_editable_order_meta_billing( $order ){
 					$caex_dte = json_decode( $caex_dte[count($caex_dte)-1], true );
 					echo '<p><strong>' . __('RecolleccionID', 'wp-caex-woocommerce') . ':</strong> <a href="' . $caex_dte['URLRecoleccion'] . '">' . $caex_dte['RecoleccionID'] . '</a></p>';
 					echo '<p><strong> ' . __('NumeroGuia', 'wp-caex-woocommerce') . ':</strong> <a href="' . $caex_dte['URLConsulta'] . '">' . $caex_dte['NumeroGuia'] . '</a></p>';
-					echo '<p><strong>' . __('MontoTarifa', 'wp-caex-woocommerce') . ':</strong> ' . $caex_dte['MontoTarifa'] . '</p>';
-					echo '<p><strong>' . __('NumeroPieza' , 'wp-caex-woocommerce') . ':</strong>' . $caex_dte['NumeroPieza'] . '</p>';
+					//echo '<p><strong>' . __('MontoTarifa', 'wp-caex-woocommerce') . ':</strong> ' . $caex_dte['MontoTarifa'] . '</p>';
+					//echo '<p><strong>' . __('NumeroPieza' , 'wp-caex-woocommerce') . ':</strong>' . $caex_dte['NumeroPieza'] . '</p>';
+					$tracking_status = get_post_meta( $order->get_id(), '_wc_order_caex_tracking_status', true );
+					if($tracking_status) {
+						echo '<p><strong>' . __('Status', 'wp-caex-woocommerce') . ':</strong> ' . $tracking_status . '</p>';
+					}
                 }
                 ?>
 			</p>
