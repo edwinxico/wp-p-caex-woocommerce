@@ -59,27 +59,26 @@ class Caex_Helper {
 
     public function get_xml_piezas_section( $order ) {
 
-        $request_xml = "
-                            <ser:Piezas>\n";
+        
         $pieza_counter = 1;
+        $order_weight = 0;
         foreach ( $order->get_items() as $order_item_key => $order_item ) {
             $product_variation_id = $order_item['variation_id'];
             if ($product_variation_id) { 
                 $product = wc_get_product($order_item['variation_id']);
             } else {
               $product = new \WC_Product($order_item['product_id']);
-            }
-            $request_xml .= "
+            }   
+            $order_weight += floatval($product->get_weight() * $order_item['quantity']);
+        }
+        $request_xml = "
+                            <ser:Piezas>
                                 <ser:Pieza>
                                     <ser:NumeroPieza>" . $pieza_counter++ . "</ser:NumeroPieza>
                                     <ser:TipoPieza>" . "2" . "</ser:TipoPieza>
                                     <ser:PesoPieza>" . $product->get_weight() . "</ser:PesoPieza>
-                                </ser:Pieza>\n";
-        }
-
-        $request_xml .= "
-                            </ser:Piezas>
-            \n";
+                                </ser:Pieza>
+                            </ser:Piezas>\n";
         
         return $request_xml;
     }

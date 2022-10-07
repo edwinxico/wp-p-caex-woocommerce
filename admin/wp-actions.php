@@ -338,7 +338,7 @@ function misha_editable_order_meta_billing( $order ){
 				foreach( $caex_cancelled_dtes as $caex_cancelled_dte ) {
 					$caex_cancelled_dte = json_decode( $caex_cancelled_dte, true );
 					if( isset( $caex_cancelled_dte['RecoleccionID'] ) && isset( $caex_cancelled_dte['NumeroGuia'])) {
-						echo '<p>( ' . $caex_cancelled_dte_index++ .' ) <a href="' . $caex_cancelled_dte['URLConsulta'] . '" target="_blank">' . $caex_cancelled_dte['NumeroGuia'] . '</a></p>';
+						echo '<p>( ' . $caex_cancelled_dte_index++ .' ) <a href="' . $caex_cancelled_dte['URLRecoleccion'] . '" target="_blank">' . $caex_cancelled_dte['RecoleccionID'] . '</a> / <a href="' . $caex_cancelled_dte['URLConsulta'] . '" target="_blank">' . $caex_cancelled_dte['NumeroGuia'] . '</a></p>';
 					}
 
 				}

@@ -86,6 +86,7 @@ class Caex_Api {
 		$xml_request = $this->caex_helper->generate_tracking_request( $order, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
+		$this->logger->log( "respuesta array:" . print_r( $api_response, true ) );
 		// Hacer llamada a api para
 		try {
 			$response['result'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['ResultadoExitoso'];
