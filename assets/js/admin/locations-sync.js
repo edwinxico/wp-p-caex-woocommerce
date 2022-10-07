@@ -12,6 +12,8 @@ jQuery(function($) {
                 console.log("sincfonización finalizó exitosamente");
                 result = JSON.parse(result);
                 $('.wc-caex-sync-result').html(result.message);
+                $('#locations_sync_date').val(result.locations_sync_date);
+
             },
             error: function(errorThrown){
                 console.log(errorThrown);

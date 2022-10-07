@@ -250,6 +250,10 @@ function dl_wc_caex_sync_locations() {
 			}
 		}
 	}
+	$response['result'] = 'success';
+	$response['message'] = "Finalizó sync de ubicaciones CAEX exitosamente";
+	$response['locations_sync_date'] = $caex_api_credentials['locations_sync_date'];
+
 	error_log( "finalizó creación o sync de locations" );
 
 	// loop en caex locations para agregar los que no se hayan agregado previamente
