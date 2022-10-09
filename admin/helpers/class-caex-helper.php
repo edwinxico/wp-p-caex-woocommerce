@@ -24,15 +24,14 @@ class Caex_Helper {
     }
 
     public function get_xml_remitente_section( $caex_settings ) {
+
         $request_xml = "
                             <ser:RemitenteNombre>" . get_bloginfo( 'name' ) .  "</ser:RemitenteNombre>
                             <ser:RemitenteDireccion>" . get_option( 'woocommerce_store_address' ) . "</ser:RemitenteDireccion>
                             <ser:RemitenteTelefono>" . ( ( isset( $caex_settings['phone'] ) ) ? $caex_settings['phone'] : "" ) .  "</ser:RemitenteTelefono>
                             <ser:CodigoPobladoOrigen>" . ( ( isset( $caex_settings['codigo_poblado_origen'] ) ) ? $caex_settings['codigo_poblado_origen'] : "" ) . "</ser:CodigoPobladoOrigen>
-                            <ser:TipoServicio>" . ( ( isset( $caex_settings['tipo_servicio'] ) ) ? $caex_settings['tipo_servicio'] : "" ) . "</ser:TipoServicio>
                             <ser:FormatoImpresion>" . ( ( isset( $caex_settings['formato_impresion'] ) ) ? $caex_settings['formato_impresion'] : "" ) . "</ser:FormatoImpresion>
-                            <ser:CodigoCredito>" . ( ( isset( $caex_settings['codigo_credito'] ) ) ? $caex_settings['codigo_credito'] : "" ) . "</ser:CodigoCredito>
-                            \n";
+                            <ser:CodigoCredito>" . ( ( isset( $caex_settings['codigo_credito'] ) ) ? $caex_settings['codigo_credito'] : "" ) . "</ser:CodigoCredito>\n";
         return $request_xml;
     }
 
@@ -47,17 +46,23 @@ class Caex_Helper {
                             <ser:ReferenciaCliente2></ser:ReferenciaCliente2>
                             <ser:CodigoPobladoDestino>" . get_post_meta( $order->get_id(), '_caex_town_id', true ) . "</ser:CodigoPobladoDestino>
                             <ser:Observaciones>" . $order->get_customer_note() . "</ser:Observaciones>
-                            <ser:CodigoReferencia>" . get_current_user_id() . "</ser:CodigoReferencia>
-                            \n";
-        /*
-        $request_xml .= "
-                            <ser:ReferenciaCliente1>string</ser:ReferenciaCliente1>
-                            <ser:ReferenciaCliente2>string</ser:ReferenciaCliente2>";
-        */
+                            <ser:CodigoReferencia>" . get_current_user_id() . "</ser:CodigoReferencia>";
+
+        if( $order->get_payment_method() == 'cod') {
+            $caex_tipo_servicio = "3"; // COD Cash on delivery
+            $request_xml .= "
+                            <ser:TipoServicio>" . $caex_tipo_servicio . "</ser:TipoServicio>
+                            <ser:MontoCOD>" . $order->get_total() . "</ser:MontoCOD>\n";
+        } else {
+            $caex_tipo_servicio .= "1"; //Servicio estándar
+            $request_xml .= "
+                            <ser:TipoServicio>" . $caex_tipo_servicio . "</ser:TipoServicio>\n";
+        }
+
         return $request_xml;
     }
 
-    public function get_xml_piezas_section( $order ) {
+    public function get_xml_piezas_section( $order, $caex_settings ) {
 
         
         $pieza_counter = 1;
@@ -68,15 +73,26 @@ class Caex_Helper {
                 $product = wc_get_product($order_item['variation_id']);
             } else {
               $product = new \WC_Product($order_item['product_id']);
-            }   
-            $order_weight += floatval($product->get_weight() * $order_item['quantity']);
+            }
+            if( $product->has_weight() && $product->get_weight() != 0 ) {
+                $order_weight += floatval($product->get_weight() * $order_item['quantity']);
+            } else {
+                $order_weight += floatval($caex_settings['peso_predeterminado'] * $order_item['quantity']);
+            }
+            
         }
         $request_xml = "
                             <ser:Piezas>
                                 <ser:Pieza>
                                     <ser:NumeroPieza>" . $pieza_counter++ . "</ser:NumeroPieza>
                                     <ser:TipoPieza>" . "2" . "</ser:TipoPieza>
-                                    <ser:PesoPieza>" . $product->get_weight() . "</ser:PesoPieza>
+                                    <ser:PesoPieza>" . $order_weight . "</ser:PesoPieza>\n";
+        if( $order->get_payment_method() == 'cod') {
+            $request_xml .= "
+                                    <ser:MontoCOD>" . $order->get_total() . "</ser:MontoCOD>\n";
+        }
+
+        $request_xml .= "
                                 </ser:Pieza>
                             </ser:Piezas>\n";
         
@@ -101,7 +117,7 @@ class Caex_Helper {
                             $this->get_xml_destinatario_section( $order ) . "
                             <ser:TipoEntrega>" . $tipoEntrega . "</ser:TipoEntrega>
                             " . ( ( $tipoEntrega == 2 ) ? $fechaRecoleccion : "" )
-                            . $this->get_xml_piezas_section( $order ) . "
+                            . $this->get_xml_piezas_section( $order, $caex_settings ) . "
                         </ser:DatosRecoleccion>
                     </ser:ListaRecolecciones>
                 </ser:GenerarGuia>
@@ -195,8 +211,6 @@ class Caex_Helper {
             update_post_meta( $order_id, 'caex_transaction_id', $caex_transaction_id );
             update_post_meta( $order_id, 'caex_transaction_id_pretty', $caex_transaction_id_pretty );
         }
-        error_log( 'caex_transaction_id: ' . $caex_transaction_id );
-        error_log( 'caex_transaction_id_pretty: ' . $caex_transaction_id_pretty );
         return $caex_transaction_id_pretty;
     }
 

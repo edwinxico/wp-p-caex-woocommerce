@@ -128,9 +128,9 @@ class Caex_Settings
         );
 
         add_settings_field(
-            'tipo_servicio', 
-            'TipoServicio', 
-            array( $this, 'tipo_servicio_callback' ), 
+            'peso_predeterminado', 
+            'Peso predeterminado', 
+            array( $this, 'peso_predeterminado_callback' ), 
             'caex-api', 
             'caex_api_section_store_info'
         );
@@ -172,8 +172,8 @@ class Caex_Settings
         if( isset( $input['codigo_poblado_origen'] ) )
             $new_input['codigo_poblado_origen'] = sanitize_text_field( $input['codigo_poblado_origen'] );
         
-        if( isset( $input['tipo_servicio'] ) )
-            $new_input['tipo_servicio'] = sanitize_text_field( $input['tipo_servicio'] );
+        if( isset( $input['peso_predeterminado'] ) )
+            $new_input['peso_predeterminado'] = sanitize_text_field( $input['peso_predeterminado'] );
 
         if( isset( $input['formato_impresion'] ) )
             $new_input['formato_impresion'] = sanitize_text_field( $input['formato_impresion'] );
@@ -254,21 +254,22 @@ class Caex_Settings
     /** 
      * Get the settings option array and print one of its values
      */
-    public function tipo_servicio_callback() {
+    public function formato_impresion_callback() {
         printf(
-            '<input type="text" id="tipo_servicio" name="caex_api_credentials[tipo_servicio]" value="%s" />',
-            isset( $this->options['tipo_servicio'] ) ? esc_attr( $this->options['tipo_servicio']) : ''
+            '<input type="text" id="formato_impresion" name="caex_api_credentials[formato_impresion]" value="%s" />',
+            isset( $this->options['formato_impresion'] ) ? esc_attr( $this->options['formato_impresion']) : ''
         );
     }
 
     /** 
      * Get the settings option array and print one of its values
      */
-    public function formato_impresion_callback() {
+    public function peso_predeterminado_callback() {
         printf(
-            '<input type="text" id="formato_impresion" name="caex_api_credentials[formato_impresion]" value="%s" />',
-            isset( $this->options['formato_impresion'] ) ? esc_attr( $this->options['formato_impresion']) : ''
+            '<input type="text" id="peso_predeterminado" name="caex_api_credentials[peso_predeterminado]" value="%s" />',
+            isset( $this->options['peso_predeterminado'] ) ? esc_attr( $this->options['peso_predeterminado']) : ''
         );
+        echo "<p>Monto predeterminado por producto que se utilizará si el peso no está asginado en los campos de producto en WooCommerce</p>";
     }
 
 }

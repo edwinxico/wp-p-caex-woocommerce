@@ -97,7 +97,7 @@ function dl_wc_process_order_meta_box_cancel_tracking_action( $order ) {
 		add_post_meta( $order->get_id(), '_caex_last_action', 'invoice_cancelled', true );
 	}
 
-	$message = sprintf( __( 'Invoice cancellation requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
+	$message = sprintf( __( 'Tracking ID cancellation requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
 	$order->add_order_note( $message );
 }
 add_action( 'woocommerce_order_action_wc_caex_cancel_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_cancel_tracking_action' );
