@@ -69,6 +69,8 @@ function dl_wc_process_order_meta_box_request_tracking_action( $order, $delivery
 }
 
 function dl_wc_process_order_meta_box_request_tracking_action_1( $order ) {
+	global $woocommerce_settings;
+	error_log( "woocommerce_settings: " . get_option( 'wc_settings_tab_demo_title', true )  );
 	dl_wc_process_order_meta_box_request_tracking_action( $order );
 }
 add_action( 'woocommerce_order_action_wc_caex_request_tracking_1', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action_1' );
