@@ -59,8 +59,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 use caex_woocommerce\Admin\Util;
 use caex_woocommerce\Admin\Helpers;
 use caex_woocommerce\Admin\Settings;
-Settings\Caex_Wc_Settings::init();
-
 
 function dl_p_caex_activate_action_link( $links ) {
 	$plugin_links = array(
@@ -104,8 +102,8 @@ function dl_p_caex_api() {
 	$Logger = new Util\Logger();
 	$ChicoteAPI = new Helpers\Caex_API();
 	if( is_admin() ) {
-		$my_settings_page_ifacere = new Settings\Caex_Settings();
-		//$my_settings_page_caex_wc = new Settings\Caex_Wc_Settings();
+		$caes_settings_api = new Settings\Caex_Settings();
+		$caex_settings_csv = new Settings\Caex_Settings_Csv();
 	}
 
 }
