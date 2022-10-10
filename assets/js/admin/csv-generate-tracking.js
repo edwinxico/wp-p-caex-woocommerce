@@ -42,3 +42,6 @@ jQuery(function($) {
         });
     });
 });
+
+
+// https://www.cloudways.com/blog/the-basics-of-file-upload-in-php/
