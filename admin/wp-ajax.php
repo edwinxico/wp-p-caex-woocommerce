@@ -85,18 +85,13 @@ function dl_wc_caex_generate_trackings() {
 						}
 
 						error_log("Respusta caex: " . print_r( $invoice_response, true ) );
-						$getData[] = ""; // Alojar si generacion de guia es exitoso o no.
+						$getData[] = $invoice_response['message']; // Alojar si generacion de guia es exitoso o no.
 
 						if( $invoice_response['result'] ) {
-
+							$getData[] = $invoice_response['tracking_data']['NumeroGuia']; //Alojar numero de guía,
+							$getData[] = $invoice_response['tracking_data']['RecoleccionID']; // Alojar recollectionID
+							$getData[] = $invoice_response['tracking_data']['URLConsulta']; // Alojar url consulta,
 						}
-
-						$getData[] = ""; // Alojar si generacion de guia es exitoso o no.
-						$getData[] = ''; //Alojar numero de guía,
-				        $getData[] = ''; // Alojar recollectionID
-						$getData[] = ''; // Alojar url consulta,
-						
-						
 						
 						$newCsvData[] = $getData;
 					}

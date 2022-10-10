@@ -51,8 +51,11 @@ jQuery(function($) {
                 console.log( result.data );
                 let csvContent = "data:text/csv;charset=utf-8," 
                 + result.data.map(e => e.join(",")).join("\n");
+                console.log("csvContent" + csvContent);
                 var encodedUri = encodeURI(csvContent);
+                console.log( "afterencodedURL" );
                 window.open(encodedUri);
+                console.log( "after window open" );
             },
             error: function(errorThrown){
                 console.log(errorThrown);
