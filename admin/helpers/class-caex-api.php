@@ -8,7 +8,7 @@ class Caex_Api {
 
 	function __construct() {
 
-		$this->caex_helper = new Caex_Helper();
+		$this->caex_api_helper = new Caex_Api_Helper();
 		$this->caex_settings = get_option ( 'caex_api_credentials' );
 		$this->url = "http://ws.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx";
 		$this->logger = new Util\Logger('dl-caex-api');
@@ -86,7 +86,7 @@ class Caex_Api {
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_request = $this->caex_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type );
+		$xml_request = $this->caex_api_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log( "respuesta array:" . print_r( $api_response, true ) );
@@ -122,7 +122,7 @@ class Caex_Api {
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_request = $this->caex_helper->generate_cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
+		$xml_request = $this->caex_api_helper->generate_cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'AnularGuia' );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
@@ -150,7 +150,7 @@ class Caex_Api {
 
 		// crear objeto para llamada del helper del
 		$url = "https://tracking.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx";
-		$xml_request = $this->caex_helper->generate_update_tracking_request( $caex_tracking_to_update, $this->caex_settings );
+		$xml_request = $this->caex_api_helper->generate_update_tracking_request( $caex_tracking_to_update, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerTrackingGuia', $url );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
@@ -177,7 +177,7 @@ class Caex_Api {
 			'result' => true,
 			'message' => 'Solicitud exitosa',
 		);
-		$xml_request = $this->caex_helper->generate_states_requext( $this->caex_settings );
+		$xml_request = $this->caex_api_helper->generate_states_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoDepartamentos' );
 		$api_response = $this->get_response_body($api_response);
 		try {
@@ -194,7 +194,7 @@ class Caex_Api {
 			'result' => true,
 			'message' => 'Solicitud exitosa',
 		);
-		$xml_request = $this->caex_helper->generate_municipalities_requext( $this->caex_settings );
+		$xml_request = $this->caex_api_helper->generate_municipalities_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoMunicipios' );
 		$api_response = $this->get_response_body($api_response);
 		try {
@@ -211,7 +211,7 @@ class Caex_Api {
 			'result' => true,
 			'message' => 'Solicitud exitosa',
 		);
-		$xml_request = $this->caex_helper->generate_towns_requext( $this->caex_settings );
+		$xml_request = $this->caex_api_helper->generate_towns_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoPoblados' );
 		$api_response = $this->get_response_body($api_response);
 		try {

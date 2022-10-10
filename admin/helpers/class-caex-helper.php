@@ -14,203 +14,141 @@ class Caex_Helper {
 		}
 	}
 
-    public function get_xml_authentication_section( $caex_settings ) {
-        $request_xml = "
-                    <ser:Autenticacion>
-                        <ser:Login>" . $caex_settings['login'] . "</ser:Login>
-                        <ser:Password>" . $caex_settings['password'] . "</ser:Password>
-                    </ser:Autenticacion>\n";
-        return $request_xml;
-    }
+    static $caexApi;
+    static $Logger;
 
-    public function get_xml_remitente_section( $caex_settings ) {
+    public static function sync_caex_locations(){
+       
+        self::$Logger->log("iniciando sincronización caex");
+        $caexApi_states = self::$caexApi->getStatesList();
+        $caexApi_municipalities = self::$caexApi->getMunicipalitiesList();
+        $caexApi_towns = self::$caexApi->getTownsList();
+        self::$Logger->log("Validando si las tablas ya cuentan con las columnas, sino agregarlas" );
 
-        $request_xml = "
-                            <ser:RemitenteNombre>" . get_bloginfo( 'name' ) .  "</ser:RemitenteNombre>
-                            <ser:RemitenteDireccion>" . get_option( 'woocommerce_store_address' ) . "</ser:RemitenteDireccion>
-                            <ser:RemitenteTelefono>" . ( ( isset( $caex_settings['phone'] ) ) ? $caex_settings['phone'] : "" ) .  "</ser:RemitenteTelefono>
-                            <ser:CodigoPobladoOrigen>" . ( ( isset( $caex_settings['codigo_poblado_origen'] ) ) ? $caex_settings['codigo_poblado_origen'] : "" ) . "</ser:CodigoPobladoOrigen>
-                            <ser:FormatoImpresion>" . ( ( isset( $caex_settings['formato_impresion'] ) ) ? $caex_settings['formato_impresion'] : "" ) . "</ser:FormatoImpresion>
-                            <ser:CodigoCredito>" . ( ( isset( $caex_settings['codigo_credito'] ) ) ? $caex_settings['codigo_credito'] : "" ) . "</ser:CodigoCredito>\n";
-        return $request_xml;
-    }
-
-    public function get_xml_destinatario_section( $order ) {
-        $request_xml = "
-                            <ser:DestinatarioNombre>" . $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() . "</ser:DestinatarioNombre>
-                            <ser:DestinatarioDireccion>" . $order->get_shipping_address_1() . " " . $order->get_shipping_address_2() . "</ser:DestinatarioDireccion>
-                            <ser:DestinatarioTelefono>" . $order->get_billing_phone() . "</ser:DestinatarioTelefono>
-                            <ser:DestinatarioContacto>" . $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() . "</ser:DestinatarioContacto>
-                            <ser:DestinatarioNIT>" . get_post_meta( $order->get_id(), '_billing_nit', true ) . "</ser:DestinatarioNIT>
-                            <ser:ReferenciaCliente1> Orden: #" . $order->get_id() . " </ser:ReferenciaCliente1>
-                            <ser:ReferenciaCliente2></ser:ReferenciaCliente2>
-                            <ser:CodigoPobladoDestino>" . get_post_meta( $order->get_id(), '_caex_town_id', true ) . "</ser:CodigoPobladoDestino>
-                            <ser:Observaciones>" . $order->get_customer_note() . "</ser:Observaciones>
-                            <ser:CodigoReferencia>" . get_current_user_id() . "</ser:CodigoReferencia>";
-
-        if( $order->get_payment_method() == 'cod') {
-            $caex_tipo_servicio = "3"; // COD Cash on delivery
-            $request_xml .= "
-                            <ser:TipoServicio>" . $caex_tipo_servicio . "</ser:TipoServicio>
-                            <ser:MontoCOD>" . $order->get_total() . "</ser:MontoCOD>\n";
-        } else {
-            $caex_tipo_servicio .= "1"; //Servicio estándar
-            $request_xml .= "
-                            <ser:TipoServicio>" . $caex_tipo_servicio . "</ser:TipoServicio>\n";
-        }
-
-        return $request_xml;
-    }
-
-    public function get_xml_piezas_section( $order, $caex_settings ) {
-
+        global $wpdb;
+        $mysql_now = $wpdb->get_results( 'SELECT DATE_SUB(NOW(), INTERVAL 1 MINUTE);', 'ARRAY_A' );
         
-        $pieza_counter = 1;
-        $order_weight = 0;
-        foreach ( $order->get_items() as $order_item_key => $order_item ) {
-            $product_variation_id = $order_item['variation_id'];
-            if ($product_variation_id) { 
-                $product = wc_get_product($order_item['variation_id']);
-            } else {
-              $product = new \WC_Product($order_item['product_id']);
-            }
-            if( $product->has_weight() && $product->get_weight() != 0 ) {
-                $order_weight += floatval($product->get_weight() * $order_item['quantity']);
-            } else {
-                $order_weight += floatval($caex_settings['peso_predeterminado'] * $order_item['quantity']);
-            }
-            
-        }
-        $request_xml = "
-                            <ser:Piezas>
-                                <ser:Pieza>
-                                    <ser:NumeroPieza>" . $pieza_counter++ . "</ser:NumeroPieza>
-                                    <ser:TipoPieza>" . "2" . "</ser:TipoPieza>
-                                    <ser:PesoPieza>" . $order_weight . "</ser:PesoPieza>\n";
-        if( $order->get_payment_method() == 'cod') {
-            $request_xml .= "
-                                    <ser:MontoCOD>" . $order->get_total() . "</ser:MontoCOD>\n";
+        $caex_api_credentials = get_option('caex_api_credentials');
+        $caex_api_credentials['locations_sync_date'] = array_values( $mysql_now[0] )[0] ;			
+        update_option('caex_api_credentials', $caex_api_credentials);
+
+
+        $row = $wpdb->get_results(  "SHOW COLUMNS FROM `{$wpdb->prefix}dl_wc_gt_departamento` LIKE 'codigo_caex_departamento';" );
+        if(empty($row)){
+            $wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_departamento ADD codigo_caex_departamento varchar(6) NOT NULL DEFAULT '00'");
         }
 
-        $request_xml .= "
-                                </ser:Pieza>
-                            </ser:Piezas>\n";
+        $row = $wpdb->get_results(  "SHOW COLUMNS FROM `{$wpdb->prefix}dl_wc_gt_municipio` LIKE 'codigo_caex_municipio';"  );
+        if(empty($row)){
+            $wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_municipio ADD codigo_caex_municipio varchar(6) NOT NULL DEFAULT '00'");
+        }
+
+        $row = $wpdb->get_results(  "SHOW COLUMNS FROM `{$wpdb->prefix}dl_wc_gt_ciudad` LIKE 'codigo_caex_ciudad';"  );
+        if(empty($row)){
+            $wpdb->query("ALTER TABLE {$wpdb->prefix}dl_wc_gt_ciudad ADD codigo_caex_ciudad varchar(6) NOT NULL DEFAULT '00'");
+        }
+
+        self::$Logger->log("Finalizó validación." );
+
+        $dl_wc_gt_states = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_departamento" );
+        $dl_wc_gt_municipalities = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_municipio" );
+        $dl_wc_gt_towns = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_ciudad" );
+
+        foreach($caexApi_states['states'] as $caex_state_key => $caex_state ) {
+            if( !isset( $caex_state['Nombre'] ) ) {
+                error_log( "caex_state: " . print_r( $caex_state, true ) );
+            }
+            $caex_state_name = strtoupper( self::dl_strip_special_chars( $caex_state['Nombre'] ) );
+            foreach($dl_wc_gt_states as $dl_wc_gt_state ) {
+                $dl_wc_gt_state_name = strtoupper( self::dl_strip_special_chars( $dl_wc_gt_state->nombre_departamento ) );
+                if( $caex_state_name == $dl_wc_gt_state_name ) {
+
+                    // Si hace match, agregar caex_id al departamento
+                    $wpdb->update( "{$wpdb->prefix}dl_wc_gt_departamento", array( 'codigo_caex_departamento' => $caex_state['Codigo'] ), array( 'codigo_postal_departamento' => $dl_wc_gt_state->codigo_postal_departamento ) );
+                    $caexApi_states['states'][$caex_state_key]['found'] = true;
+
+                    // Buscar municipios del estado
+                    $dl_wc_gt_municipalities = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_municipio WHERE codigo_postal_departamento = {$dl_wc_gt_state->codigo_postal_departamento}" );
+
+                    foreach( $caexApi_municipalities['municipalities'] as $caex_municipality_key => $caex_municipality ) {
+                        $caex_municipality_name = strtoupper( self::dl_strip_special_chars( $caex_municipality['Nombre'] ) );
+                        foreach($dl_wc_gt_municipalities as $dl_wc_gt_municipality ) {
+                            $dl_wc_gt_municipality_name = strtoupper( self::dl_strip_special_chars( $dl_wc_gt_municipality->nombre_municipio ) );
+                            if( $caex_municipality_name == $dl_wc_gt_municipality_name ) {
+
+                                $caexApi_municipalities['municipalities'][$caex_municipality_key]['found'] = true;
+
+                                // Si hace match, agregar caex_id al municipio
+                                $wpdb->update( "{$wpdb->prefix}dl_wc_gt_municipio", array( 'codigo_caex_municipio' => $caex_municipality['Codigo'] ), array( 'codigo_postal_municipio' => $dl_wc_gt_municipality->codigo_postal_municipio ) );
+
+                                // Buscar localidades del municipio
+                                $dl_wc_gt_towns = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_ciudad WHERE codigo_postal_municipio = {$dl_wc_gt_municipality->codigo_postal_municipio}" );
+
+                                foreach( $caexApi_towns['towns'] as $caex_town_key => $caex_town ) {
+                                    $caex_town_name = strtoupper( self::dl_strip_special_chars( $caex_town['Nombre'] ) );
+                                    foreach($dl_wc_gt_towns as $dl_wc_gt_town ) {
+                                        $dl_wc_gt_town_name = strtoupper( self::dl_strip_special_chars( $dl_wc_gt_town->nombre_ciudad ) );
+                                        if( $caex_town_name == $dl_wc_gt_town_name ) {
+
+                                            $caexApi_towns['towns'][$caex_town_key]['found'] = true;
+                                            // Si hace match, agregar caex_id a la localidad
+                                            $wpdb->update( "{$wpdb->prefix}dl_wc_gt_ciudad", array( 'codigo_caex_ciudad' => $caex_town['Codigo'] ), array( 'codigo_postal_ciudad' => $dl_wc_gt_town->codigo_postal_ciudad ) );
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return  $caex_api_credentials['locations_sync_date'];
+    }
+
+    public static function dl_strip_special_chars($cadena){
+		
+        $cadena = preg_replace('/\s+/', ' ', $cadena);
+        //Reemplazamos la A y a
+        $cadena = str_replace(
+        array('Á', 'À', 'Â', 'Ä', 'á', 'à', 'ä', 'â', 'ª'),
+        array('A', 'A', 'A', 'A', 'a', 'a', 'a', 'a', 'a'),
+        $cadena
+        );
+    
+        //Reemplazamos la E y e
+        $cadena = str_replace(
+        array('É', 'È', 'Ê', 'Ë', 'é', 'è', 'ë', 'ê'),
+        array('E', 'E', 'E', 'E', 'e', 'e', 'e', 'e'),
+        $cadena );
+    
+        //Reemplazamos la I y i
+        $cadena = str_replace(
+        array('Í', 'Ì', 'Ï', 'Î', 'í', 'ì', 'ï', 'î'),
+        array('I', 'I', 'I', 'I', 'i', 'i', 'i', 'i'),
+        $cadena );
+    
+        //Reemplazamos la O y o
+        $cadena = str_replace(
+        array('Ó', 'Ò', 'Ö', 'Ô', 'ó', 'ò', 'ö', 'ô'),
+        array('O', 'O', 'O', 'O', 'o', 'o', 'o', 'o'),
+        $cadena );
+    
+        //Reemplazamos la U y u
+        $cadena = str_replace(
+        array('Ú', 'Ù', 'Û', 'Ü', 'ú', 'ù', 'ü', 'û'),
+        array('U', 'U', 'U', 'U', 'u', 'u', 'u', 'u'),
+        $cadena );
+    
+        //Reemplazamos la N, n, C y c
+        $cadena = str_replace(
+        array('Ñ', 'ñ', 'Ç', 'ç'),
+        array('N', 'n', 'C', 'c'),
+        $cadena
+        );
         
-        return $request_xml;
-    }
-
-    public function generate_tracking_request( $order, $caex_settings, $delivery_type = 1 ) {
-        $fechaRecoleccion = "
-                            <ser:FechaRecoleccion>" . date('Y-m-d')  . "</ser:FechaRecoleccion>"; // yyyy-mm-dd
-        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
-        <soapenv:Header/>
-            <soapenv:Body>
-                <ser:GenerarGuia>\n"
-                    . $this->get_xml_authentication_section( $caex_settings ) . 
-                    "
-                    <ser:ListaRecolecciones>
-                        <ser:DatosRecoleccion>
-                            <ser:RecoleccionID>" . $this->getCaexTransactionId( $order ) . "</ser:RecoleccionID>"
-                            . $this->get_xml_remitente_section( $caex_settings ) .
-                            $this->get_xml_destinatario_section( $order ) . "
-                            <ser:TipoEntrega>" . $delivery_type . "</ser:TipoEntrega>
-                            " . ( ( $delivery_type == 2 ) ? $fechaRecoleccion : "" )
-                            . $this->get_xml_piezas_section( $order, $caex_settings ) . "
-                        </ser:DatosRecoleccion>
-                    </ser:ListaRecolecciones>
-                </ser:GenerarGuia>
-            </soapenv:Body>
-        </soapenv:Envelope>";
-        return $request_xml;
-    }
-
-    public function generate_cancel_tracking_request( $caex_tracking_to_cancel, $caex_settings ) {
-        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
-        <soapenv:Header/>
-            <soapenv:Body>
-                <ser:AnularGuia>\n"
-                    . $this->get_xml_authentication_section( $caex_settings ) . 
-                    "
-                    <ser:NumeroGuia>" . $caex_tracking_to_cancel['NumeroGuia'] . "</ser:NumeroGuia>
-                    <ser:CodigoCredito>" . $caex_settings['codigo_credito'] . "</ser:CodigoCredito>
-                </ser:AnularGuia>
-            </soapenv:Body>
-        </soapenv:Envelope>";
-        return $request_xml;
-    }
-
-    public function generate_update_tracking_request( $caex_tracking_to_update, $caex_settings ) {
-        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
-        <soapenv:Header/>
-            <soapenv:Body>
-                <ser:ObtenerTrackingGuia>\n"
-                    . $this->get_xml_authentication_section( $caex_settings ) . 
-                    "
-                    <ser:NumeroGuia>" . $caex_tracking_to_update['NumeroGuia'] . "</ser:NumeroGuia>
-                </ser:ObtenerTrackingGuia>
-            </soapenv:Body>
-        </soapenv:Envelope>";
-        return $request_xml;
-    }
-
-    public function generate_states_requext( $caex_settings ) {
-        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
-        <soapenv:Header/>
-            <soapenv:Body>
-                <ser:ObtenerListadoDepartamentos>\n"
-                    . $this->get_xml_authentication_section( $caex_settings ) . "
-                </ser:ObtenerListadoDepartamentos>
-            </soapenv:Body>
-        </soapenv:Envelope>";
-        return $request_xml;
-    }
-
-    public function generate_municipalities_requext( $caex_settings ) {
-        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
-        <soapenv:Header/>
-            <soapenv:Body>
-                <ser:ObtenerListadoMunicipios>\n"
-                    . $this->get_xml_authentication_section( $caex_settings ) . "
-                </ser:ObtenerListadoMunicipios>
-            </soapenv:Body>
-        </soapenv:Envelope>";
-        return $request_xml;
-    }
-
-    public function generate_towns_requext( $caex_settings ) {
-        $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
-        xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
-        <soapenv:Header/>
-            <soapenv:Body>
-                <ser:ObtenerListadoPoblados>\n"
-                    . $this->get_xml_authentication_section( $caex_settings ) . "
-                </ser:ObtenerListadoPoblados>
-            </soapenv:Body>
-        </soapenv:Envelope>";
-        return $request_xml;
-    }
-
-    public function getCaexTransactionId( $order ) {
-        $order_id = $order->get_id();
-        $caex_transaction_id = 1;
-        $caex_transaction_id_pretty = sprintf( "%07d", $order_id ) . '_' . sprintf( "%03d", $caex_transaction_id );
-
-        if( !get_post_meta( $order_id, 'caex_transaction_id', true ) ) {
-            add_post_meta( $order_id, 'caex_transaction_id', $caex_transaction_id, true );
-            add_post_meta( $order_id, 'caex_transaction_id_pretty', $caex_transaction_id_pretty, true );
-        } else {
-            $caex_transaction_id = get_post_meta( $order_id, 'caex_transaction_id', true );
-            $caex_transaction_id++;
-            $caex_transaction_id_pretty = sprintf( "%07d", $order_id ) . '_' . sprintf( "%03d", $caex_transaction_id );
-            update_post_meta( $order_id, 'caex_transaction_id', $caex_transaction_id );
-            update_post_meta( $order_id, 'caex_transaction_id_pretty', $caex_transaction_id_pretty );
-        }
-        return $caex_transaction_id_pretty;
+        return $cadena;
     }
 
 }
