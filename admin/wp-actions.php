@@ -27,10 +27,10 @@ function dl_wc_add_order_meta_box_action( $actions ) {
 	// add "mark printed" custom action
     if( $enable_caex ) {
         if( !get_post_meta( $theorder->get_id(), '_wc_order_caex_tracking', true ) || $caex_last_action == 'invoice_cancelled' ) {
-            $actions['wc_caex_request_tracking'] = 'Caex | ' . __( 'Generate tracking ID', 'wp-caex-woocommerce' );
+            $actions['wc_caex_request_tracking_1'] = 'Caex | ' . __( 'Generate tracking ID (Normal delivery)', 'wp-caex-woocommerce' );
+			$actions['wc_caex_request_tracking_2'] = 'Caex | ' . __( 'Generate tracking ID (SameDay delivery)', 'wp-caex-woocommerce' );
         } else {
 			$actions['wc_caex_update_tracking_status'] = 'Caex | ' . __( 'Update tracking ID status', 'wp-caex-woocommerce' );
-            $actions['wc_caex_send_invoice_to_client'] = 'Caex | ' . __( 'Send tracking ID to client', 'wp-caex-woocommerce' );
             $actions['wc_caex_cancel_tracking'] = 'Caex | ' . __( 'Cancel previosly generated tracking ID', 'wp-caex-woocommerce' );
         }
     }
@@ -47,11 +47,11 @@ add_action( 'woocommerce_order_actions', __NAMESPACE__ . '\\dl_wc_add_order_meta
  *
  * @param \WC_Order $order
  */
-function dl_wc_process_order_meta_box_request_tracking_action( $order ) {
+function dl_wc_process_order_meta_box_request_tracking_action( $order, $delivery_type = 1 ) {
     $caexApi = new Helpers\Caex_Api();
 	$Logger = new Util\Logger('caex-woocommerce');
 	$Logger->log("caex-woocommerce: Requesting tracking id for order: " . $order->get_id() );
-    $invoice_response = $caexApi->requestTracking($order);
+    $invoice_response = $caexApi->requestTracking($order, $delivery_type);
     if( !$invoice_response['result'] ) {
         // error ,agregar nota al pedido sobre la razón del error
         $order->add_order_note( "Error CAEX:" . $invoice_response['response_code'] . " - " . $invoice_response['message'] );
@@ -67,7 +67,17 @@ function dl_wc_process_order_meta_box_request_tracking_action( $order ) {
 	$message = sprintf( __( 'Tracking ID from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
 	$order->add_order_note( $message );
 }
-add_action( 'woocommerce_order_action_wc_caex_request_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action' );
+
+function dl_wc_process_order_meta_box_request_tracking_action_1( $order ) {
+	dl_wc_process_order_meta_box_request_tracking_action( $order );
+}
+add_action( 'woocommerce_order_action_wc_caex_request_tracking_1', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action_1' );
+
+function dl_wc_process_order_meta_box_request_tracking_action_2( $order ) {
+	dl_wc_process_order_meta_box_request_tracking_action( $order, 2 );
+}
+add_action( 'woocommerce_order_action_wc_caex_request_tracking_2', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action_2' );
+
 
 /**
  * Cancel invoice from inflie service
@@ -123,33 +133,6 @@ function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
 	$order->add_order_note( $message );
 }
 add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_update_tracking_status_action' );
-
-/**
- * Send invoice from inflie service
- * Add an order note whe action is clicked
- * Add a flag on the order to show it's been run
- *
- * @param \WC_Order $order
- */
-function dl_wc_process_order_meta_box_send_invoice_to_client_action( $order ) {
-	$Logger = new Util\Logger('dl-caex');
-	$Logger->log( 'action to send invoice to client');
-	$wc_emails = WC()->mailer()->get_emails();
-
-	$email_action_response = $wc_emails['Caex_Email_Notification']->trigger( $order->get_id() );
-	
-	if( $email_action_response ) {
-		$Logger->log( 'action to send invoice to client true');
-
-	} else {
-		$Logger->log( 'action to send invoice to client false');
-
-	}
-
-	$message = sprintf( __( 'Invoice sent to the client by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
-	$order->add_order_note( $message );
-}
-add_action( 'woocommerce_order_action_wc_caex_send_invoice_to_client', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_send_invoice_to_client_action' );
 
 
 

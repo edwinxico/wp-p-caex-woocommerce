@@ -81,12 +81,12 @@ class Caex_Api {
 		return false;
 	}
 
-	public function requestTracking( $order ) {
+	public function requestTracking( $order, $delivery_type = 1 ) {
         $response['result'] = true;
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_request = $this->caex_helper->generate_tracking_request( $order, $this->caex_settings );
+		$xml_request = $this->caex_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log( "respuesta array:" . print_r( $api_response, true ) );
@@ -97,8 +97,16 @@ class Caex_Api {
 			if( $response['result'] ) {
 				$response['tracking_data'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion'];
 			} else {
-				$response['message'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['MensajeError'];
-				$response['response_code'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['CodigoRespuesta'];
+				if( isset( $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['MensajeError'] ) ) {
+					$response['message'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['MensajeError'];
+					$response['response_code'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ListaRecolecciones']['DatosRecoleccion']['ResultadoOperacion']['CodigoRespuesta'];
+				} else {
+					if ( isset( $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ResultadoOperacionMultiple']['MensajeError'] ) ) {
+						$response['message'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ResultadoOperacionMultiple']['MensajeError'];
+						$response['response_code'] = $api_response['GenerarGuiaResponse']['ResultadoGenerarGuia']['ResultadoOperacionMultiple']['CodigoRespuesta'];
+					}
+				}
+				
 			}
 		} catch (Exception $e) {
 			$response['result'] = false;

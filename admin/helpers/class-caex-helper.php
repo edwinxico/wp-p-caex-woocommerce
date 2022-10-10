@@ -99,8 +99,7 @@ class Caex_Helper {
         return $request_xml;
     }
 
-    public function generate_tracking_request( $order, $caex_settings ) {
-        $tipoEntrega = 1;
+    public function generate_tracking_request( $order, $caex_settings, $delivery_type = 1 ) {
         $fechaRecoleccion = "
                             <ser:FechaRecoleccion>" . date('Y-m-d')  . "</ser:FechaRecoleccion>"; // yyyy-mm-dd
         $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
@@ -115,8 +114,8 @@ class Caex_Helper {
                             <ser:RecoleccionID>" . $this->getCaexTransactionId( $order ) . "</ser:RecoleccionID>"
                             . $this->get_xml_remitente_section( $caex_settings ) .
                             $this->get_xml_destinatario_section( $order ) . "
-                            <ser:TipoEntrega>" . $tipoEntrega . "</ser:TipoEntrega>
-                            " . ( ( $tipoEntrega == 2 ) ? $fechaRecoleccion : "" )
+                            <ser:TipoEntrega>" . $delivery_type . "</ser:TipoEntrega>
+                            " . ( ( $delivery_type == 2 ) ? $fechaRecoleccion : "" )
                             . $this->get_xml_piezas_section( $order, $caex_settings ) . "
                         </ser:DatosRecoleccion>
                     </ser:ListaRecolecciones>
