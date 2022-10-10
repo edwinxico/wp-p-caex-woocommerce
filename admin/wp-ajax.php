@@ -84,6 +84,12 @@ function dl_wc_caex_generate_trackings() {
 							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
 						}
 
+						error_log("Respusta caex: " . print_r( $invoice_response, true ) );
+						$getData[] = ""; // Alojar si generacion de guia es exitoso o no.
+
+						if( $invoice_response['result'] ) {
+
+						}
 
 						$getData[] = ""; // Alojar si generacion de guia es exitoso o no.
 						$getData[] = ''; //Alojar numero de guía,

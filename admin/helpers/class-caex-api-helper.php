@@ -54,7 +54,7 @@ class Caex_Api_Helper {
                             <ser:TipoServicio>" . $caex_tipo_servicio . "</ser:TipoServicio>
                             <ser:MontoCOD>" . $order->get_total() . "</ser:MontoCOD>\n";
         } else {
-            $caex_tipo_servicio .= "1"; //Servicio estándar
+            $caex_tipo_servicio = "1"; //Servicio estándar
             $request_xml .= "
                             <ser:TipoServicio>" . $caex_tipo_servicio . "</ser:TipoServicio>\n";
         }
