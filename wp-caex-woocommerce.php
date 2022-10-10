@@ -46,6 +46,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		require_once( trailingslashit( dirname( __FILE__ ) ) . 'inc/autoloader.php' );
 		require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/wp-filters.php');
 		require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/wp-actions.php');
+		require_once( trailingslashit( dirname( __FILE__ ) ) . 'admin/wp-ajax.php');
 	} else {
 		add_action('admin_notices', 'dl_p_caex_add_api_notice', 10);		
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'dl_p_caex_activate_action_link' );

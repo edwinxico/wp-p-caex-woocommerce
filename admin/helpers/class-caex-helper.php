@@ -18,20 +18,16 @@ class Caex_Helper {
     static $Logger;
 
     public static function sync_caex_locations(){
-       
         self::$Logger->log("iniciando sincronización caex");
         $caexApi_states = self::$caexApi->getStatesList();
         $caexApi_municipalities = self::$caexApi->getMunicipalitiesList();
         $caexApi_towns = self::$caexApi->getTownsList();
         self::$Logger->log("Validando si las tablas ya cuentan con las columnas, sino agregarlas" );
-
         global $wpdb;
         $mysql_now = $wpdb->get_results( 'SELECT DATE_SUB(NOW(), INTERVAL 1 MINUTE);', 'ARRAY_A' );
-        
         $caex_api_credentials = get_option('caex_api_credentials');
         $caex_api_credentials['locations_sync_date'] = array_values( $mysql_now[0] )[0] ;			
         update_option('caex_api_credentials', $caex_api_credentials);
-
 
         $row = $wpdb->get_results(  "SHOW COLUMNS FROM `{$wpdb->prefix}dl_wc_gt_departamento` LIKE 'codigo_caex_departamento';" );
         if(empty($row)){

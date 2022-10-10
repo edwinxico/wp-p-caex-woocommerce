@@ -136,8 +136,6 @@ function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
 }
 add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_update_tracking_status_action' );
 
-
-
 // Adding admin js script for ajax synchronization of states
 function dl_wc_caex_admin_scripts() {
 	wp_enqueue_script( 'dl_wc_caex_admin_script', CAEX_API_PLUGIN_URL . 'dist/assets/js/admin.min.js', array( 'jquery' ), '1.0.0', true );
@@ -147,42 +145,6 @@ function dl_wc_caex_admin_scripts() {
 	) );
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\dl_wc_caex_admin_scripts' );
-
-
-
-function dl_wc_caex_sync_locations() {
-    // Check for nonce security
-	error_log("Llamada ajax para sinc locations");
-    $nonce = sanitize_text_field( $_POST['nonce'] );
-    if ( ! wp_verify_nonce( $nonce, 'dl_wc_caex_admin_script' ) ) {
-        die ( 'Busted!');
-    }
-	$response = array(
-		"result" => false,
-		"message" => "Error al sincronizar localidades"
-	);
-
-	Helpers\Caex_Helper::$caexApi = new Helpers\Caex_Api();
-	Helpers\Caex_Helper::$Logger = new Util\Logger('caex-woocommerce');
-	
-
-	$response['locations_sync_date'] = Helpers\Caex_Helper::sync_caex_locations();
-	$response['result'] = 'success';
-	$response['message'] = "Finalizó sync de ubicaciones CAEX exitosamente";
-
-	error_log( "finalizó creación o sync de locations" );
-
-	// loop en caex locations para agregar los que no se hayan agregado previamente
-
-
-    echo json_encode( $response );
-    wp_die();
-}
-add_action( 'wp_ajax_nopriv_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_locations' );
-add_action( 'wp_ajax_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_locations' );
-
-
-
 
 function dl_save_caex_town_id( $order_id ) {
 	error_log("entering saving method");
