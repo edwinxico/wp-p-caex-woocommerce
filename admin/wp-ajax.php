@@ -57,16 +57,12 @@ function dl_wc_caex_generate_trackings() {
 				'application/vnd.msexcel',
 				'text/plain'
 			);
-		
 			// Validate whether selected file is a CSV file
 			if (!empty($_FILES['file_0']['name']) && in_array($_FILES['file_0']['type'], $fileMimes)) {
-		
 					// Open uploaded CSV file with read-only mode
 					$csvFile = fopen($_FILES['file_0']['tmp_name'], 'r');
-		
 					// Skip the first line
 					fgetcsv($csvFile);
-
 					$newCsvData = array();
 					
 					// Parse data from CSV file line by line
@@ -78,12 +74,25 @@ function dl_wc_caex_generate_trackings() {
 		
 						// If user already exists in the database with the same email
 						error_log("acá debo llamar metodo de generar guía");
-						error_log("orderid: " . $csvOrderId );
-						error_log("recollectionDate: " . $csvRecollectionDate );
-						error_log("deliveryType: " . $csvDeliveryType );
 
-						$getData[] = 'New Column';
-				        $newCsvData[] = $getData;
+						$caexApi = new Helpers\Caex_Api();
+						$Logger = new Util\Logger('caex-woocommerce');
+						$order = new \WC_Order( $csvOrderId );
+						if( $csvDeliveryType == 2 ) {
+							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType, $csvRecollectionDate);
+						} else {
+							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
+						}
+
+
+						$getData[] = ""; // Alojar si generacion de guia es exitoso o no.
+						$getData[] = ''; //Alojar numero de guía,
+				        $getData[] = ''; // Alojar recollectionID
+						$getData[] = ''; // Alojar url consulta,
+						
+						
+						
+						$newCsvData[] = $getData;
 					}
 		
 					// Close opened CSV file

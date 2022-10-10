@@ -81,12 +81,12 @@ class Caex_Api {
 		return false;
 	}
 
-	public function requestTracking( $order, $delivery_type = 1 ) {
+	public function requestTracking( $order, $delivery_type = 1, $delivery_date = null ) {
         $response['result'] = true;
         $response['message'] = "Solicitud exitosa";
 
 		// crear objeto para llamada del helper del
-		$xml_request = $this->caex_api_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type );
+		$xml_request = $this->caex_api_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type, $delivery_date );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log( "respuesta array:" . print_r( $api_response, true ) );

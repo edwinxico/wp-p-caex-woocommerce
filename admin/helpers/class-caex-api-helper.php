@@ -99,9 +99,13 @@ class Caex_Api_Helper {
         return $request_xml;
     }
 
-    public function generate_tracking_request( $order, $caex_settings, $delivery_type = 1 ) {
+    public function generate_tracking_request( $order, $caex_settings, $delivery_type = 1, $delivery_date = null ) {
         $fechaRecoleccion = "
                             <ser:FechaRecoleccion>" . date('Y-m-d')  . "</ser:FechaRecoleccion>"; // yyyy-mm-dd
+        if( is_string( $delivery_date ) ) {
+            $fechaRecoleccion = "
+            <ser:FechaRecoleccion>" . $delivery_date . "</ser:FechaRecoleccion>"; // yyyy-mm-dd
+        }
         $request_xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"
         xmlns:ser=\"http://www.caexlogistics.com/ServiceBus\">
         <soapenv:Header/>
