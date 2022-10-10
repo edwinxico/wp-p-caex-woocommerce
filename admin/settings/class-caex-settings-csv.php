@@ -85,7 +85,7 @@ class Caex_Settings_Csv {
             array( $this, 'combine_pdfs_callback' ), 
             'caex-csv', 
             'caex_csv_section_upload'
-        );  
+        ); 
     
     }
 
@@ -117,20 +117,30 @@ class Caex_Settings_Csv {
      * Get the settings option array and print one of its values
      */
     public function generate_trackings_callback() {
+        /*
         printf(
             '<input type="text" id="generate_trackings" name="caex_csv_data[generate_trackings]" value="%s" />',
             isset( $this->options['generate_trackings'] ) ? esc_attr( $this->options['generate_trackings']) : ''
         );
+        */
+        echo '<input id="uploadImage" type="file" accept="image/*" name="image" />
+              <input class="btn btn-success btn-caex-generate-trackings" type="submit" value="Generar Guías">';
     }
 
     /** 
      * Get the settings option array and print one of its values
      */
     public function combine_pdfs_callback() {
+        /*
         printf(
             '<input type="text" id="combine_pdfs" name="caex_csv_data[combine_pdfs]" value="%s" />',
             isset( $this->options['combine_pdfs'] ) ? esc_attr( $this->options['combine_pdfs']) : ''
         );
+        */
+
+        echo '<input id="uploadImage" type="file" accept="image/*" name="image" />
+              <input class="btn btn-success btn-caex-generate-pdfs" type="submit" value="Obtener PDF\'s combinados">';
+        echo '<style> .settings_page_caex-csv #submit{ display: none } </style>';
     }
 
 }
