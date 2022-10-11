@@ -14,7 +14,13 @@ async function copyPages( urls_array  ) {
     
     const pdfBytes = await pdfDoc.save()
     console.log("just before trying to download pdf");
-    download(pdfBytes, "pdf-lib_page_copying_example.pdf", "application/pdf");
+    const date = new Date();
+
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const dateWithHyphens = [year, month, day].join('-');
+    download(pdfBytes, dateWithHyphens + "_guias-caex_" + Math.floor(Date.now() / 1000) + ".pdf", "application/pdf");
 }
 
 jQuery(function($) {
