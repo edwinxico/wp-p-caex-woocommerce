@@ -1,29 +1,17 @@
 const { PDFDocument } = PDFLib;
 
-async function copyPages() {
-    const url1 = 'https://ws.caexlogistics.com/wsCAEXLogisticsSB/doc/VerGuiaPDF.aspx?NumeroGuia=1W229422399&Login=PHONEXGT'
-    const url2 = 'https://ws.caexlogistics.com/wsCAEXLogisticsSB/doc/VerGuiaPDF.aspx?NumeroGuia=1W229422400&Login=PHONEXGT'
-  
-    const firstDonorPdfBytes = await fetch(url1,{ method: 'GET',
-    mode: 'cors',
-    cache: 'default'
- }).then(res => res.arrayBuffer()).catch( error => console.log(error));
-    const secondDonorPdfBytes = await fetch(url2,{ method: 'GET',
-    mode: 'cors',
-    cache: 'default'
- }).then(res => res.arrayBuffer()).catch( error => console.log(error))
-  
-    const firstDonorPdfDoc = await PDFDocument.load(firstDonorPdfBytes)
-    const secondDonorPdfDoc = await PDFDocument.load(secondDonorPdfBytes)
-  
+async function copyPages( urls_array  ) {
+
     const pdfDoc = await PDFDocument.create();
-  
-    const [firstDonorPage] = await pdfDoc.copyPages(firstDonorPdfDoc, [0])
-    const [secondDonorPage] = await pdfDoc.copyPages(secondDonorPdfDoc, [0])
-  
-    pdfDoc.addPage(firstDonorPage)
-    pdfDoc.insertPage(0, secondDonorPage)
-  
+
+    for (let index = 0; index < urls_array.length; index++) {
+        const url1 = urls_array[index]
+        const firstDonorPdfBytes = await fetch(url1).then(res => res.arrayBuffer());
+        const firstDonorPdfDoc = await PDFDocument.load(firstDonorPdfBytes)
+        const [firstDonorPage] = await pdfDoc.copyPages(firstDonorPdfDoc, [0])
+        pdfDoc.addPage(firstDonorPage)
+    }
+    
     const pdfBytes = await pdfDoc.save()
     console.log("just before trying to download pdf");
     download(pdfBytes, "pdf-lib_page_copying_example.pdf", "application/pdf");
@@ -89,7 +77,13 @@ jQuery(function($) {
                 window.open(encodedUri);
                 console.log( "after window open" );
                 console.log("started working on pdfs:");
-                copyPages();
+                if( result.result ) {
+                    console.log("exito si debo combinar pdfs");
+                    copyPages(result.pdfs);
+                } else {
+                    console.log("ningun éxito, no");
+                }
+
                 console.log("after calling copyPages()");
 
             },

@@ -39,7 +39,8 @@ function dl_wc_caex_generate_trackings() {
     }
 	$response = array(
 		"result" => false,
-		"message" => "Error al sincronizar localidades"
+		"message" => "Error al sincronizar localidades",
+		"pdfs" => array()
 	);
 
     if(!empty($_FILES["file_0"]["name"])) {
@@ -89,10 +90,17 @@ function dl_wc_caex_generate_trackings() {
 						$getData[] = $invoice_response['message']; // Alojar si generacion de guia es exitoso o no.
 
 						if( $invoice_response['result'] ) {
+							$response['result'] = true;
 							$getData[] = $invoice_response['tracking_data']['NumeroGuia']; //Alojar numero de guía,
 							$getData[] = $invoice_response['tracking_data']['RecoleccionID']; // Alojar recollectionID
 							$getData[] = $invoice_response['tracking_data']['URLConsulta']; // Alojar url consulta,
-							file_put_contents("/var/www/html/wp-content/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf" ,file_get_contents( $invoice_response['tracking_data']['URLConsulta']  ));
+							if( !file_exists( WP_CONTENT_DIR . "/uploads/guias-caex/" ) ) {
+								mkdir( WP_CONTENT_DIR . "/uploads/guias-caex/", 0755, true );
+							}
+							$tmp_pdf_url = content_url() . "/uploads/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf";
+							$tmp_pdf_path =  WP_CONTENT_DIR . "/uploads/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf";
+							file_put_contents( $tmp_pdf_path , file_get_contents( $invoice_response['tracking_data']['URLConsulta']  ));
+							$response['pdfs'][] = $tmp_pdf_url;
 						}
 						
 						$newCsvData[] = $getData;
