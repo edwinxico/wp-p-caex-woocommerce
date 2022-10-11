@@ -32,6 +32,7 @@ add_action( 'wp_ajax_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_lo
 function dl_wc_caex_generate_trackings() {
     // Check for nonce security
 	error_log("Llamada ajax para generar trackings");
+
     $nonce = sanitize_text_field( $_POST['nonce'] );
     if ( ! wp_verify_nonce( $nonce, 'dl_wc_caex_admin_script' ) ) {
         die ( 'Busted!');
@@ -91,6 +92,7 @@ function dl_wc_caex_generate_trackings() {
 							$getData[] = $invoice_response['tracking_data']['NumeroGuia']; //Alojar numero de guía,
 							$getData[] = $invoice_response['tracking_data']['RecoleccionID']; // Alojar recollectionID
 							$getData[] = $invoice_response['tracking_data']['URLConsulta']; // Alojar url consulta,
+							file_put_contents("/var/www/html/wp-content/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf" ,file_get_contents( $invoice_response['tracking_data']['URLConsulta']  ));
 						}
 						
 						$newCsvData[] = $getData;
@@ -100,6 +102,7 @@ function dl_wc_caex_generate_trackings() {
 					fclose($csvFile);
 					$response['data'] = $newCsvData;
 					error_log( "Exito" );
+
 				
 			} else {
 				error_log( "Error1: Archivo no válido");

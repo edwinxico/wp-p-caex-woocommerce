@@ -1,11 +1,17 @@
 const { PDFDocument } = PDFLib;
 
 async function copyPages() {
-    const url1 = 'https://pdf-lib.js.org/assets/with_update_sections.pdf'
-    const url2 = 'https://pdf-lib.js.org/assets/with_large_page_count.pdf'
+    const url1 = 'https://ws.caexlogistics.com/wsCAEXLogisticsSB/doc/VerGuiaPDF.aspx?NumeroGuia=1W229422399&Login=PHONEXGT'
+    const url2 = 'https://ws.caexlogistics.com/wsCAEXLogisticsSB/doc/VerGuiaPDF.aspx?NumeroGuia=1W229422400&Login=PHONEXGT'
   
-    const firstDonorPdfBytes = await fetch(url1).then(res => res.arrayBuffer())
-    const secondDonorPdfBytes = await fetch(url2).then(res => res.arrayBuffer())
+    const firstDonorPdfBytes = await fetch(url1,{ method: 'GET',
+    mode: 'cors',
+    cache: 'default'
+ }).then(res => res.arrayBuffer()).catch( error => console.log(error));
+    const secondDonorPdfBytes = await fetch(url2,{ method: 'GET',
+    mode: 'cors',
+    cache: 'default'
+ }).then(res => res.arrayBuffer()).catch( error => console.log(error))
   
     const firstDonorPdfDoc = await PDFDocument.load(firstDonorPdfBytes)
     const secondDonorPdfDoc = await PDFDocument.load(secondDonorPdfBytes)
@@ -13,7 +19,7 @@ async function copyPages() {
     const pdfDoc = await PDFDocument.create();
   
     const [firstDonorPage] = await pdfDoc.copyPages(firstDonorPdfDoc, [0])
-    const [secondDonorPage] = await pdfDoc.copyPages(secondDonorPdfDoc, [742])
+    const [secondDonorPage] = await pdfDoc.copyPages(secondDonorPdfDoc, [0])
   
     pdfDoc.addPage(firstDonorPage)
     pdfDoc.insertPage(0, secondDonorPage)
