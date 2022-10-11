@@ -1,0 +1,4 @@
+[submodule "admin/helpers/pdfmerger"]
+	path = admin/helpers/pdfmerger
+	url = git@github.com:DigitalLabsAgcy/PDFMerger.git
+
