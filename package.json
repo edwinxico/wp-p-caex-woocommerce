@@ -23,7 +23,9 @@
     },
     "homepage": "https://github.com/xicoofficial/wp-p-infile-woocommerce#readme",
     "dependencies": {
-        "cleave.js": "^1.6.0"
+        "cleave.js": "^1.6.0",
+        "downloadjs": "^1.4.7",
+        "pdf-lib": "^1.17.1"
     },
     "devDependencies": {
         "gulp": "^4.0.2",

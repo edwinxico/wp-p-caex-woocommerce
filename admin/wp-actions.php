@@ -138,6 +138,8 @@ add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPA
 
 // Adding admin js script for ajax synchronization of states
 function dl_wc_caex_admin_scripts() {
+	wp_enqueue_script( 'pdf-lib', CAEX_API_PLUGIN_URL . 'dist/node_modules/pdf-lib/dist/pdf-lib.min.js', array( 'jquery' ), '1.0.0', true );
+	wp_enqueue_script( 'downloadjs', CAEX_API_PLUGIN_URL . 'dist/node_modules/downloadjs/download.min.js', array( 'jquery' ), '1.0.0', true );
 	wp_enqueue_script( 'dl_wc_caex_admin_script', CAEX_API_PLUGIN_URL . 'dist/assets/js/admin.min.js', array( 'jquery' ), '1.0.0', true );
 	wp_localize_script( 'dl_wc_caex_admin_script', 'dl_wc_caex_admin_script', array(
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -145,6 +147,17 @@ function dl_wc_caex_admin_scripts() {
 	) );
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\dl_wc_caex_admin_scripts' );
+
+function add_type_attribute($tag, $handle, $src) {
+    // if not your script, do nothing and return original $tag
+    if ( 'dl_wc_caex_admin_script' !== $handle ) {
+        return $tag;
+    }
+    // change the script tag by adding type="module" and return it.
+    $tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
+    return $tag;
+}
+add_filter('script_loader_tag', __NAMESPACE__ . '\\add_type_attribute' , 10, 3);
 
 function dl_save_caex_town_id( $order_id ) {
 	error_log("entering saving method");

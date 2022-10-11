@@ -45,6 +45,8 @@ function clean_dist() {
 var filesToMove = [
         './assets/images/*.*',
         './node_modules/cleave.js/dist/cleave.min.js',
+        './node_modules/pdf-lib/dist/pdf-lib.min.js',
+        './node_modules/downloadjs/download.min.js',
     ];
 
 function move() {

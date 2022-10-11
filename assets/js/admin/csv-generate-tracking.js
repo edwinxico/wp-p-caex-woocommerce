@@ -1,4 +1,30 @@
+const { PDFDocument } = PDFLib;
+
+async function copyPages() {
+    const url1 = 'https://pdf-lib.js.org/assets/with_update_sections.pdf'
+    const url2 = 'https://pdf-lib.js.org/assets/with_large_page_count.pdf'
+  
+    const firstDonorPdfBytes = await fetch(url1).then(res => res.arrayBuffer())
+    const secondDonorPdfBytes = await fetch(url2).then(res => res.arrayBuffer())
+  
+    const firstDonorPdfDoc = await PDFDocument.load(firstDonorPdfBytes)
+    const secondDonorPdfDoc = await PDFDocument.load(secondDonorPdfBytes)
+  
+    const pdfDoc = await PDFDocument.create();
+  
+    const [firstDonorPage] = await pdfDoc.copyPages(firstDonorPdfDoc, [0])
+    const [secondDonorPage] = await pdfDoc.copyPages(secondDonorPdfDoc, [742])
+  
+    pdfDoc.addPage(firstDonorPage)
+    pdfDoc.insertPage(0, secondDonorPage)
+  
+    const pdfBytes = await pdfDoc.save()
+    console.log("just before trying to download pdf");
+    download(pdfBytes, "pdf-lib_page_copying_example.pdf", "application/pdf");
+}
+
 jQuery(function($) {
+
     // Handler for .ready() called.
     console.log("handler for ready called");
     if( $('.settings_page_caex-csv #wpbody-content').length ) {
@@ -56,6 +82,10 @@ jQuery(function($) {
                 console.log( "afterencodedURL" );
                 window.open(encodedUri);
                 console.log( "after window open" );
+                console.log("started working on pdfs:");
+                copyPages();
+                console.log("after calling copyPages()");
+
             },
             error: function(errorThrown){
                 console.log(errorThrown);

@@ -69,8 +69,7 @@ function dl_wc_caex_generate_trackings() {
 					while (($getData = fgetcsv($csvFile, 10000, ",")) !== FALSE) {
 						// Get row data
 						$csvOrderId = $getData[0];
-						$csvRecollectionDate = $getData[1];
-						$csvDeliveryType = $getData[2];
+						$csvDeliveryType = $getData[1];
 		
 						// If user already exists in the database with the same email
 						error_log("acá debo llamar metodo de generar guía");
@@ -79,6 +78,7 @@ function dl_wc_caex_generate_trackings() {
 						$Logger = new Util\Logger('caex-woocommerce');
 						$order = new \WC_Order( $csvOrderId );
 						if( $csvDeliveryType == 2 ) {
+							$csvRecollectionDate = $getData[2];
 							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType, $csvRecollectionDate);
 						} else {
 							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
