@@ -70,22 +70,6 @@ class Caex_Settings_Csv {
             array( $this, 'print_section_info' ), // Callback
             'caex-csv' // Page
         );
-
-        add_settings_field(
-            'generate_trackings', // ID
-            'Generar guías & PDF', // API Password 
-            array( $this, 'generate_trackings_callback' ), // Callback
-            'caex-csv', // Page
-            'caex_csv_section_upload' // Section           
-        );      
-
-        add_settings_field(
-            'combine_pdfs', 
-            'Obtener PDF combinado', 
-            array( $this, 'combine_pdfs_callback' ), 
-            'caex-csv', 
-            'caex_csv_section_upload'
-        ); 
     
     }
 
