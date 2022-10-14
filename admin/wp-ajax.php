@@ -86,28 +86,20 @@ function dl_wc_caex_generate_trackings() {
 							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
 						}
 
-						//Setear datos de orden
-						if( !$invoice_response['result'] ) {
-							// error ,agregar nota al pedido sobre la razón del error
-							$order->add_order_note( "Error CAEX:" . $invoice_response['response_code'] . " - " . $invoice_response['message'] );
-						}
-						// exito, agregar datos de invoice a la órden
-						add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['tracking_data'] ) );
-						if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
-							update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested' );
-						} else {
-							add_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested', true );
-						}
-						$message = sprintf( __( 'Tracking ID from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
-						$order->add_order_note( $message );
-
-
-
-
 						error_log("Respusta caex: " . print_r( $invoice_response, true ) );
 						$getData[] = $invoice_response['message']; // Alojar si generacion de guia es exitoso o no.
 
 						if( $invoice_response['result'] ) {
+							// exito, agregar datos de invoice a la órden
+							add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['tracking_data'] ) );
+							if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
+								update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested' );
+							} else {
+								add_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested', true );
+							}
+							$message = sprintf( __( 'Tracking ID from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
+							$order->add_order_note( $message );
+
 							$response['result'] = true;
 							$getData[] = $invoice_response['tracking_data']['NumeroGuia']; //Alojar numero de guía,
 							$getData[] = $invoice_response['tracking_data']['RecoleccionID']; // Alojar recollectionID
@@ -119,6 +111,8 @@ function dl_wc_caex_generate_trackings() {
 							$tmp_pdf_path =  WP_CONTENT_DIR . "/uploads/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf";
 							file_put_contents( $tmp_pdf_path , file_get_contents( $invoice_response['tracking_data']['URLConsulta']  ));
 							$response['pdfs'][] = $tmp_pdf_url;
+						} else {
+							$order->add_order_note( "Error CAEX:" . $invoice_response['response_code'] . " - " . $invoice_response['message'] );
 						}
 						
 						$newCsvData[] = $getData;
