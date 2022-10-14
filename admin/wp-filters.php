@@ -1,5 +1,5 @@
 <?php
-
+namespace caex_woocommerce\Admin;
 use caex_woocommerce\Admin\Util;
 
 
