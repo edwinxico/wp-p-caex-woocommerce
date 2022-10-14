@@ -104,6 +104,14 @@ class Caex_Settings
         );
 
         add_settings_field(
+            'address', // ID
+            'Address', // API Password 
+            array( $this, 'address_callback' ), // Callback
+            'caex-api', // Page
+            'caex_api_section_store_info' // Section           
+        );      
+
+        add_settings_field(
             'phone', // ID
             'Phone', // API Password 
             array( $this, 'phone_callback' ), // Callback
@@ -163,6 +171,9 @@ class Caex_Settings
         if( isset( $input['locations_sync_date'] ) )
             $new_input['locations_sync_date'] = sanitize_text_field( $input['locations_sync_date'] );
         
+        if( isset( $input['address'] ) )
+            $new_input['address'] = sanitize_text_field( $input['address'] );
+            
         if( isset( $input['phone'] ) )
             $new_input['phone'] = sanitize_text_field( $input['phone'] );
 
@@ -219,6 +230,16 @@ class Caex_Settings
         );
         echo "<button class=\"btn-caex-sync\">Sync Now</button>";
         echo "<div class=\"wc-caex-sync-result\"></div>";
+    }
+
+    /** 
+     * Get the settings option array and print one of its values
+     */
+    public function address_callback() {
+        printf(
+            '<input type="text" id="address" name="caex_api_credentials[address]" value="%s" />',
+            isset( $this->options['address'] ) ? esc_attr( $this->options['address']) : ''
+        );
     }
 
     /** 

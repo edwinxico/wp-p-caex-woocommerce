@@ -27,7 +27,7 @@ class Caex_Api_Helper {
 
         $request_xml = "
                             <ser:RemitenteNombre>" . get_bloginfo( 'name' ) .  "</ser:RemitenteNombre>
-                            <ser:RemitenteDireccion>" . get_option( 'woocommerce_store_address' ) . "</ser:RemitenteDireccion>
+                            <ser:RemitenteDireccion>" . ( ( isset( $caex_settings['address'] ) ) ? $caex_settings['address'] : "" ) . "</ser:RemitenteDireccion>
                             <ser:RemitenteTelefono>" . ( ( isset( $caex_settings['phone'] ) ) ? $caex_settings['phone'] : "" ) .  "</ser:RemitenteTelefono>
                             <ser:CodigoPobladoOrigen>" . ( ( isset( $caex_settings['codigo_poblado_origen'] ) ) ? $caex_settings['codigo_poblado_origen'] : "" ) . "</ser:CodigoPobladoOrigen>
                             <ser:FormatoImpresion>" . ( ( isset( $caex_settings['formato_impresion'] ) ) ? $caex_settings['formato_impresion'] : "" ) . "</ser:FormatoImpresion>
