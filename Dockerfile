@@ -23,11 +23,15 @@ RUN curl https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip -o
 
 RUN curl https://downloads.wordpress.org/plugin/wc-guatemala.latest-stable.zip -o wc-guatemala.zip
 
+RUN curl https://downloads.wordpress.org/theme/storefront.latest-stable.zip -o storefront.zip
+
 RUN unzip woocommerce.zip -d /var/www/html/wp-content/plugins/
 
 RUN unzip wc-guatemala.zip -d /var/www/html/wp-content/plugins/
 
-RUN rm woocommerce.zip wc-guatemala.zip
+RUN unzip storefront.zip -d /var/www/html/wp-content/themes/
+
+RUN rm woocommerce.zip wc-guatemala.zip storefront.zip
 
 COPY . /var/www/html/wp-content/plugins/wp-p-caex-woocommerce
 
