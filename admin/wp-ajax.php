@@ -87,40 +87,58 @@ function dl_wc_caex_generate_trackings() {
 							continue;
 						}
 
-						if( $csvDeliveryType == 2 ) {
-							$csvRecollectionDate = $getData[2];
-							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType, $csvRecollectionDate);
-						} else {
-							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
+						// Crear carpeta donde en el futuro se agregan los pdfs
+						if( !file_exists( WP_CONTENT_DIR . "/uploads/guias-caex/" ) ) {
+							mkdir( WP_CONTENT_DIR . "/uploads/guias-caex/", 0755, true );
 						}
 
-						error_log("Respusta caex: " . print_r( $invoice_response, true ) );
-						$getData[] = $invoice_response['message']; // Alojar si generacion de guia es exitoso o no.
+						$caex_dte = get_post_meta( $order->get_id() , '_wc_order_caex_tracking' );
+						$caex_last_action = get_post_meta( $order->get_id() , '_caex_last_action', true );
+						if( $caex_dte && $caex_last_action == 'invoice_requested' ) {
+							$caex_dte = json_decode( $caex_dte[count($caex_dte)-1], true );
+
+							$getData[] = __("Order already had a tracking id.", 'wp-caex-woocommerce');
+							$invoice_response = array(
+								'tracking_data' => $caex_dte,
+								'result' => true
+							);
+						} else {
+
+							if( $csvDeliveryType == 2 ) {
+								$csvRecollectionDate = $getData[2];
+								$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType, $csvRecollectionDate);
+							} else {
+								$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
+							}
+
+							error_log("Respusta caex: " . print_r( $invoice_response, true ) );
+							$getData[] = $invoice_response['message']; // Alojar si generacion de guia es exitoso o no.
+
+							if( $invoice_response['result'] ) {
+								// exito, agregar datos de invoice a la órden
+								add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['tracking_data'] ) );
+								if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
+									update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested' );
+								} else {
+									add_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested', true );
+								}
+								$message = sprintf( __( 'Tracking ID from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
+								$order->add_order_note( $message );								
+							} else {
+								$order->add_order_note( "Error CAEX:" . $invoice_response['response_code'] . " - " . $invoice_response['message'] );
+							}
+						}
 
 						if( $invoice_response['result'] ) {
-							// exito, agregar datos de invoice a la órden
-							add_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $invoice_response['tracking_data'] ) );
-							if( get_post_meta( $order->get_id(), '_caex_last_action', true ) ) {
-								update_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested' );
-							} else {
-								add_post_meta( $order->get_id(), '_caex_last_action', 'invoice_requested', true );
-							}
-							$message = sprintf( __( 'Tracking ID from Caex requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
-							$order->add_order_note( $message );
-
 							$response['result'] = true;
 							$getData[] = $invoice_response['tracking_data']['NumeroGuia']; //Alojar numero de guía,
 							$getData[] = $invoice_response['tracking_data']['RecoleccionID']; // Alojar recollectionID
 							$getData[] = $invoice_response['tracking_data']['URLConsulta']; // Alojar url consulta,
-							if( !file_exists( WP_CONTENT_DIR . "/uploads/guias-caex/" ) ) {
-								mkdir( WP_CONTENT_DIR . "/uploads/guias-caex/", 0755, true );
-							}
+							
 							$tmp_pdf_url = content_url() . "/uploads/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf";
 							$tmp_pdf_path =  WP_CONTENT_DIR . "/uploads/guias-caex/" . $invoice_response['tracking_data']['NumeroGuia'] . ".pdf";
 							file_put_contents( $tmp_pdf_path , file_get_contents( $invoice_response['tracking_data']['URLConsulta']  ));
 							$response['pdfs'][] = $tmp_pdf_url;
-						} else {
-							$order->add_order_note( "Error CAEX:" . $invoice_response['response_code'] . " - " . $invoice_response['message'] );
 						}
 						
 						$newCsvData[] = $getData;
