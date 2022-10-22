@@ -1,0 +1,10 @@
+{
+    "name": "PhonexGT",
+    "host": "ftp.flywheelsites.com",
+    "protocol": "ftp",
+    "port": 21,
+    "username": "",
+    "password": "",
+    "remotePath": "/wp-admin/plugins/wp-p-caex-woocommerce/",
+    "uploadOnSave": false
+}
