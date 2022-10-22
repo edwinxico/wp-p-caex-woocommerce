@@ -72,11 +72,12 @@ jQuery(function($) {
 
             beforeSend: function(jqXHR, settings) {
                 console.log("Haven't entered server side yet.");
-                $('#dl-caex-sync-response').html('<div class="alert alert-info">Generating tracking ids...</div>');
+                $('#dl-caex-sync-response').append('<div class="alert alert-info">Generating tracking ids...</div>');
+                $('#dl-caex-sync-response').append('<div class="loader"></div>');
             },
             success: function(result){
                 console.log("sincfonización finalizó exitosamente");
-                $('.wc-caex-sync-result').html(result.message);
+                $('#dl-caex-sync-response').html(result.message);
                 $('#locations_sync_date').val(result.locations_sync_date);
                 console.log( result.data );
                 let csvContent = "data:text/csv;charset=utf-8," 

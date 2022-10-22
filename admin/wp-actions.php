@@ -145,6 +145,7 @@ function dl_wc_caex_admin_scripts() {
 		'ajax_url' => admin_url( 'admin-ajax.php' ),
 		'nonce' => wp_create_nonce( 'dl_wc_caex_admin_script' ),
 	) );
+	wp_enqueue_style( 'custom-css', CAEX_API_PLUGIN_URL . 'dist/assets/css/custom-admin.css', array(), filemtime( CAEX_API_PLUGIN_PATH . 'dist/assets/css/custom-admin.css' ) );
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\dl_wc_caex_admin_scripts' );
 

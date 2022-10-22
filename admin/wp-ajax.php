@@ -39,7 +39,7 @@ function dl_wc_caex_generate_trackings() {
     }
 	$response = array(
 		"result" => false,
-		"message" => "Error al sincronizar localidades",
+		"message" => "Error al generar guías",
 		"pdfs" => array()
 	);
 
@@ -78,7 +78,15 @@ function dl_wc_caex_generate_trackings() {
 
 						$caexApi = new Helpers\Caex_Api();
 						$Logger = new Util\Logger('caex-woocommerce');
-						$order = new \WC_Order( $csvOrderId );
+						
+						$order = wc_get_order( $csvOrderId );
+
+						if( !$order ) {
+							$getData[] = __("Order not found in WooCommerce.", 'wp-caex-woocommerce');
+							$newCsvData[] = $getData;
+							continue;
+						}
+
 						if( $csvDeliveryType == 2 ) {
 							$csvRecollectionDate = $getData[2];
 							$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType, $csvRecollectionDate);
@@ -120,6 +128,7 @@ function dl_wc_caex_generate_trackings() {
 		
 					// Close opened CSV file
 					fclose($csvFile);
+					$response['message'] = "Se han procesado el archivo correctamente.";
 					$response['data'] = $newCsvData;
 					error_log( "Exito" );
 

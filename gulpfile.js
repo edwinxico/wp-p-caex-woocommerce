@@ -5,6 +5,7 @@ const uglify = require('gulp-uglify');
 const less = require('gulp-less');
 const minifyCSS = require('gulp-csso');
 const concat = require('gulp-concat');
+const sourcemaps = require('gulp-sourcemaps');
 
 /*
 function client_css() {
@@ -14,14 +15,15 @@ function client_css() {
     .pipe(sourcemaps.write('./maps'))
     .pipe(dest('dist/assets/css'))
 }
+*/
 function admin_css() {
   return src('./assets/less/custom-admin.less')
     .pipe(less())
     .pipe(minifyCSS())
     .pipe(sourcemaps.write('./maps'))
-    .pipe(dest('dist/css'))
+    .pipe(dest('dist/assets/css'))
 }
-*/
+
 
 function admin_js() {
   return src('./assets/js/admin/*.js', { sourcemaps: true })
@@ -59,8 +61,8 @@ exports.move = move;
 exports.admin_js = admin_js;
 exports.admin_js_prod = admin_js_prod;
 // exports.client_css = client_css;
-// exports.admin_css = admin_css;
+exports.admin_css = admin_css;
 // exports.css = parallel(client_css);
 exports.clean = parallel(clean_dist);
-exports.production = parallel(admin_js_prod, move);
-exports.default = parallel(admin_js, move);
+exports.production = parallel(admin_js_prod, admin_css, move);
+exports.default = parallel(admin_js, admin_css, move);
