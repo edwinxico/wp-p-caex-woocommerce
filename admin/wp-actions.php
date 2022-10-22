@@ -255,3 +255,20 @@ function save_custom_shipping_fields( $order_id ) {
 add_action( 'woocommerce_update_order', __NAMESPACE__ . '\\save_custom_shipping_fields' );
 
 
+// Agregar link de guia a detalle de órden
+function dl_add_caex_invoice_to_order_details( $order ) {
+	$caex_dte = get_post_meta( $order->get_id(), '_wc_order_caex_tracking' );
+	$caex_last_action = get_post_meta( $order->get_id() , '_caex_last_action', true );
+	if( $caex_dte && $caex_last_action != 'invoice_cancelled' ) {
+		$caex_dte = json_decode( $caex_dte[count($caex_dte)-1], true );
+		?>
+		<div class="d-flex flex-wrap order-info order-invoice m-b-xl m-t-xs p-t-lg">
+			<div class="order-item">
+				<strong><?= __('Tracking ID', 'wp-caex-woocommerce') ?></strong>
+				<mark class="font-weight-bold order-total"><a href="https://www.cargoexpreso.com/tracking/?guia==<?= $caex_dte['NumeroGuia'] ?>" target="_blank"><?= $caex_dte['NumeroGuia'] ?></a></mark>
+			</div>
+		</div>
+		<?php
+	}
+}
+add_action('woocommerce_order_details_before_order_table', __NAMESPACE__ . '\\dl_add_caex_invoice_to_order_details');
