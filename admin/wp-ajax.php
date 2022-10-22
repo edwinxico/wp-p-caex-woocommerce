@@ -7,7 +7,6 @@ use caex_woocommerce\Admin\Util;
 
 function dl_wc_caex_sync_locations() {
     // Check for nonce security
-	error_log("Llamada ajax para sinc locations");
     $nonce = sanitize_text_field( $_POST['nonce'] );
     if ( ! wp_verify_nonce( $nonce, 'dl_wc_caex_admin_script' ) ) {
         die ( 'Busted!');
@@ -22,7 +21,6 @@ function dl_wc_caex_sync_locations() {
 	$response['locations_sync_date'] = Helpers\Caex_Helper::sync_caex_locations();
 	$response['result'] = 'success';
 	$response['message'] = "Finalizó sync de ubicaciones CAEX exitosamente";
-	error_log( "finalizó creación o sync de locations" );
     echo json_encode( $response );
     wp_die();
 }
@@ -31,8 +29,6 @@ add_action( 'wp_ajax_caex_sync_locations', __NAMESPACE__ . '\\dl_wc_caex_sync_lo
 
 function dl_wc_caex_generate_trackings() {
     // Check for nonce security
-	error_log("Llamada ajax para generar trackings");
-
     $nonce = sanitize_text_field( $_POST['nonce'] );
     if ( ! wp_verify_nonce( $nonce, 'dl_wc_caex_admin_script' ) ) {
         die ( 'Busted!');
@@ -74,8 +70,6 @@ function dl_wc_caex_generate_trackings() {
 						$csvDeliveryType = $getData[1];
 		
 						// If user already exists in the database with the same email
-						error_log("acá debo llamar metodo de generar guía");
-
 						$caexApi = new Helpers\Caex_Api();
 						$Logger = new Util\Logger('caex-woocommerce');
 						
@@ -111,7 +105,6 @@ function dl_wc_caex_generate_trackings() {
 								$invoice_response = $caexApi->requestTracking($order, $csvDeliveryType);
 							}
 
-							error_log("Respusta caex: " . print_r( $invoice_response, true ) );
 							$getData[] = $invoice_response['message']; // Alojar si generacion de guia es exitoso o no.
 
 							if( $invoice_response['result'] ) {
@@ -146,22 +139,19 @@ function dl_wc_caex_generate_trackings() {
 		
 					// Close opened CSV file
 					fclose($csvFile);
-					$response['message'] = "Se han procesado el archivo correctamente.";
+					$response['message'] = _("The csv file has been proccessed successfully.");
 					$response['data'] = $newCsvData;
-					error_log( "Exito" );
-
 				
 			} else {
-				error_log( "Error1: Archivo no válido");
+				$response['message'] = _("The csv file is not valid.", "wp-caex-woocommerce");
 			}
 		} else {
-		error_log(  "Error2: No ha seleccionado ningún archivo" );  
+			$response['message'] = _("No file was submitted.", "wp-caex-woocommerce");
 		}
 
 	Helpers\Caex_Helper::$caexApi = new Helpers\Caex_Api();
 	Helpers\Caex_Helper::$Logger = new Util\Logger('caex-woocommerce');
     // $response['locations_sync_date'] = Helpers\Caex_Helper::generate_trackings();
-	error_log( "finalizó creación de trackings" );
     echo json_encode( $response );
     wp_die();
 }
