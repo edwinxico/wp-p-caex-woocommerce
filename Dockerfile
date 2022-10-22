@@ -23,16 +23,28 @@ RUN curl https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip -o
 
 RUN curl https://downloads.wordpress.org/plugin/wc-guatemala.latest-stable.zip -o wc-guatemala.zip
 
+RUN curl https://downloads.wordpress.org/plugin/loco-translate.latest-stable.zip -o loco-translate.zip
+
+RUN curl https://downloads.wordpress.org/plugin/woocommerce-product-generator.latest-stable.zip -o woocommerce-product-generator.zip
+
+RUN curl https://downloads.wordpress.org/plugin/storefront-visual-guide.latest-stable.zip -o storefront-visual-guide.zip
+
 RUN curl https://downloads.wordpress.org/theme/storefront.latest-stable.zip -o storefront.zip
 
 RUN unzip woocommerce.zip -d /var/www/html/wp-content/plugins/
 
 RUN unzip wc-guatemala.zip -d /var/www/html/wp-content/plugins/
 
+RUN unzip loco-translate.zip -d /var/www/html/wp-content/plugins/
+
+RUN unzip storefront-visual-guide.zip -d /var/www/html/wp-content/plugins/
+
+RUN unzip woocommerce-product-generator.zip -d /var/www/html/wp-content/plugins/
+
 RUN unzip storefront.zip -d /var/www/html/wp-content/themes/
 
-RUN rm woocommerce.zip wc-guatemala.zip storefront.zip
+RUN rm woocommerce.zip wc-guatemala.zip storefront.zip loco-translate.zip woocommerce-product-generator.zip storefront-visual-guide.zip
 
-COPY . /var/www/html/wp-content/plugins/wp-p-caex-woocommerce
+COPY . /var/www/html/wp-content/plugins/wp-p-${PROJECT_NAME:-caex-woocommerce}
 
 EXPOSE 8080
