@@ -27,14 +27,17 @@ jQuery(function($) {
 
     // Handler for .ready() called.
     console.log("handler for ready called");
+
     if( $('.settings_page_caex-csv #wpbody-content').length ) {
+        $('#wpbody-content .wrap form').remove();
         var upload_csv_html_form = `<div class="container">
         <h2 class="mb-3 mt-3"> Generate multiple tracking ids from a CSV File</h2>
         <form method="post" enctype="multipart/form-data" id="generate_trackings_form">
             <div class="form-group">
-              <label for="exampleFormControlFile1">Please Select File</label>
+              <label for="exampleFormControlFile1">Please Select File</label><br>
               <input id="file_import" name="import_data" type="file" />
             </div>
+            <div id="dl-caex-sync-response"></div>
             <div class="form-group">
              <input type="submit" name="submit" value="submit" class="btn btn-primary">
            </div>
@@ -69,6 +72,7 @@ jQuery(function($) {
 
             beforeSend: function(jqXHR, settings) {
                 console.log("Haven't entered server side yet.");
+                $('#dl-caex-sync-response').html('<div class="alert alert-info">Generating tracking ids...</div>');
             },
             success: function(result){
                 console.log("sincfonización finalizó exitosamente");
@@ -95,6 +99,7 @@ jQuery(function($) {
             },
             error: function(errorThrown){
                 console.log(errorThrown);
+                $('#dl-caex-sync-response').html('<div class="alert alert-danger">Error: ' + errorThrown + '</div>');
             }
         });
     });
