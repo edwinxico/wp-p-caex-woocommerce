@@ -114,7 +114,7 @@ function dl_wc_process_order_meta_box_cancel_tracking_action( $order ) {
 }
 add_action( 'woocommerce_order_action_wc_caex_cancel_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_cancel_tracking_action' );
 
-
+// Función para obtener estado de caex api y actualizar orden
 function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
 	$Logger = new Util\Logger('dl-caex');
     $caexApi = new Helpers\Caex_Api();
@@ -129,7 +129,18 @@ function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
         return;
     }
 
-	update_post_meta( $order->get_id(), '_wc_order_caex_tracking_status', $invoice_response['tracking_status'] );
+	$caex_tracking_to_update['status'] = $invoice_response['tracking_status'];
+	$caex_tracking_to_update['status_desc'] = $invoice_response['tracking_status_desc'];
+
+	if( $caex_tracking_to_update['status'] == 'R' ) {
+		//Recolectado, mover orden a En ruta de entrega
+		$order->update_status( 'on-route' );
+	}
+	if( $caex_tracking_to_update['status'] == 'A' || $caex_tracking_to_update['status'] == 'AA') {
+		//Entregado, mover orden a completado
+		$order->update_status( 'completed' );
+	}
+	update_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $caex_tracking_to_update ) );
 	
 	$message = sprintf( __( 'Invoice status update requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
 	$order->add_order_note( "CAEX | " . $message );
@@ -214,9 +225,8 @@ function misha_editable_order_meta_billing( $order ){
 					echo '<p><strong> ' . __('NumeroGuia', 'wp-caex-woocommerce') . ':</strong> <a href="' . $caex_dte['URLConsulta'] . '">' . $caex_dte['NumeroGuia'] . '</a></p>';
 					//echo '<p><strong>' . __('MontoTarifa', 'wp-caex-woocommerce') . ':</strong> ' . $caex_dte['MontoTarifa'] . '</p>';
 					//echo '<p><strong>' . __('NumeroPieza' , 'wp-caex-woocommerce') . ':</strong>' . $caex_dte['NumeroPieza'] . '</p>';
-					$tracking_status = get_post_meta( $order->get_id(), '_wc_order_caex_tracking_status', true );
-					if($tracking_status) {
-						echo '<p><strong>' . __('Status', 'wp-caex-woocommerce') . ':</strong> ' . $tracking_status . '</p>';
+					if( isset( $caex_dte['status'] ) ) {
+						echo '<p><strong>' . __('Status', 'wp-caex-woocommerce') . ':</strong> ' . $caex_dte['status'] . " - " . $caex_dte['status_desc'] . '</p>';
 					}
                 }
                 ?>
@@ -273,3 +283,16 @@ function dl_add_caex_invoice_to_order_details( $order ) {
 	}
 }
 add_action('woocommerce_order_details_before_order_table', __NAMESPACE__ . '\\dl_add_caex_invoice_to_order_details');
+
+
+function register_custom_order_status() {
+    register_post_status( 'wc-on-route', array(
+        'label'                     => _('On Route', 'wp-caex-woocommerce'),
+        'public'                    => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list'    => true,
+        'exclude_from_search'       => false,
+        'label_count'               => _n_noop( 'On Route <span class="count">(%s)</span>', 'On Route <span class="count">(%s)</span>' )
+    ) );
+}
+add_action( 'init', __NAMESPACE__ . '\\register_custom_order_status' );

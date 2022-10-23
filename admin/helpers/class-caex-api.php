@@ -91,7 +91,7 @@ class Caex_Api {
 
 	public function requestTracking( $order, $delivery_type = 1, $delivery_date = null ) {
         $response['result'] = true;
-        $response['message'] = "Solicitud exitosa";
+        $response['message'] = __("Successful request", 'wp-caex-woocommerce');
 
 		// crear objeto para llamada del helper del
 		$xml_request = $this->caex_api_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type, $delivery_date );
@@ -126,7 +126,7 @@ class Caex_Api {
 
 	public function cancelTracking( $caex_tracking_to_cancel ) {
 		$response['result'] = true;
-        $response['message'] = "Solicitud exitosa";
+        $response['message'] = __('Successful request', 'wp-caex-woocommerce');
 
 		// crear objeto para llamada del helper del
 		$xml_request = $this->caex_api_helper->generate_cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
@@ -162,7 +162,8 @@ class Caex_Api {
 
 		if( $this->debug_mode ) {
 			$response['result'] = true;
-			$response['tracking_status'] = "Recolectado"; // Sin Recolectar, Recolectado, Almacenado en bodega, Entregado, Entregado - Liquidado, Devolución, Devolución Entregado, Anomalía, Ruta hacia bodega destino,
+			$response['tracking_status'] = "A"; // Sin Recolectar, Recolectado, Almacenado en bodega, Entregado, Entregado - Liquidado, Devolución, Devolución Entregado, Anomalía, Ruta hacia bodega destino,
+			$response['tracking_status_desc'] = "Entregado";
 			return $response;
 		}
 
@@ -171,7 +172,8 @@ class Caex_Api {
 			$response['result'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso']; 
 			$response['result'] = filter_var( $response['result'], FILTER_VALIDATE_BOOLEAN);			
 			if( $response['result'] ) {
-				$response['tracking_status'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['DatosGuia']['PODStatusDes'];
+				$response['tracking_status'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['DatosGuia']['PODStatus'];
+				$response['tracking_status_desc'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['DatosGuia']['PODStatusDes'];
 			} else {
 				$response['message'] = print_r( $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['MensajeError'], true);
 			}
@@ -187,7 +189,7 @@ class Caex_Api {
 	public function getStatesList() {
 		$response = array(
 			'result' => true,
-			'message' => 'Solicitud exitosa',
+			'message' => __('Successful request', 'wp-caex-woocommerce')
 		);
 		$xml_request = $this->caex_api_helper->generate_states_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoDepartamentos' );
@@ -203,7 +205,7 @@ class Caex_Api {
 	public function getMunicipalitiesList() {
 		$response = array(
 			'result' => true,
-			'message' => 'Solicitud exitosa',
+			'message' => __('Successful request', 'wp-caex-woocommerce')
 		);
 		$xml_request = $this->caex_api_helper->generate_municipalities_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoMunicipios' );
@@ -219,7 +221,7 @@ class Caex_Api {
 	public function getTownsList() {
 		$response = array(
 			'result' => true,
-			'message' => 'Solicitud exitosa',
+			'message' => __('Successful request', 'wp-caex-woocommerce')
 		);
 		$xml_request = $this->caex_api_helper->generate_towns_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoPoblados' );

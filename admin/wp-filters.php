@@ -60,3 +60,16 @@ function dl_adon_plugin_template( $template, $template_name, $template_path ) {
    return $template;
 }
 add_filter( 'woocommerce_locate_template', __NAMESPACE__ . '\\dl_adon_plugin_template', 1, 3 );
+
+
+function add_custom_order_status( $order_statuses ) {
+  $new_order_statuses = array();
+  foreach ( $order_statuses as $key => $status ) {
+      $new_order_statuses[ $key ] = $status;
+      if ( 'wc-on-hold' === $key ) {
+          $new_order_statuses['wc-on-route'] = __('On Route', 'wp-caex-woocommerce');
+      }
+  }
+  return $new_order_statuses;
+}
+add_filter( 'wc_order_statuses', __NAMESPACE__ . '\\add_custom_order_status' );
