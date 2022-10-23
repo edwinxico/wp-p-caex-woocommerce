@@ -12,15 +12,15 @@ class Caex_Api {
 		$this->caex_settings = get_option ( 'caex_api_credentials' );
 		$this->url = "http://ws.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx";
 		$this->logger = new Util\Logger('dl-caex-api');
-		$this->debub_mode = false;
+		$this->debug_mode = false;
 		if( defined('DL_DEBUG') ) {
-			$this->debub_mode = DL_DEBUG;
+			$this->debug_mode = DL_DEBUG;
 		}
 
 	}
 
 	function send_curl_request( $xml_request, $soap_action, $url = null ) {
-		if ( $this->debub_mode ) {
+		if ( $this->debug_mode ) {
 			$this->logger->log( "xml enviado: " . $xml_request );
 		}
 		if( $url == null ) {
@@ -51,7 +51,7 @@ class Caex_Api {
 
 		curl_close($curl);
 
-		if ( $this->debub_mode ) {
+		if ( $this->debug_mode ) {
 			$this->logger->log( "respuesta servicio: "  . print_r( $response, true) );
 		}
 		if( empty( $response ) ) {
@@ -75,16 +75,16 @@ class Caex_Api {
 		return  $array;
 	}
 
-	function set_debub_mode($debub_mode) {
-		if( $debub_mode ) {
-			$this->debub_mode = $debub_mode;
+	function set_debug_mode($debug_mode) {
+		if( $debug_mode ) {
+			$this->debug_mode = $debug_mode;
 		}
-		$this->debub_mode = false;
+		$this->debug_mode = false;
 	}
 
-	function get_debub_mode() {
-		if( $this->debub_mode ) {
-			return $this->debub_mode;
+	function get_debug_mode() {
+		if( $this->debug_mode ) {
+			return $this->debug_mode;
 		}
 		return false;
 	}
@@ -160,7 +160,7 @@ class Caex_Api {
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerTrackingGuia', $url );
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
 
-		if( defined( DL_DEBUG ) && DL_DEBUG ) {
+		if( $this->debug_mode ) {
 			$response['result'] = true;
 			$response['tracking_status'] = "Recolectado"; // Sin Recolectar, Recolectado, Almacenado en bodega, Entregado, Entregado - Liquidado, Devolución, Devolución Entregado, Anomalía, Ruta hacia bodega destino,
 			return $response;
