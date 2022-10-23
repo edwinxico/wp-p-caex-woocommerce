@@ -154,8 +154,9 @@ class Caex_Api {
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerTrackingGuia', $url );
 		$api_response = $this->get_response_body($api_response);
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
+
 		// Hacer llamada a api para
-		try {
+		if( isset( $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso'] ) ) {
 			$response['result'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso']; 
 			$response['result'] = filter_var( $response['result'], FILTER_VALIDATE_BOOLEAN);			
 			if( $response['result'] ) {
@@ -163,9 +164,9 @@ class Caex_Api {
 			} else {
 				$response['message'] = print_r( $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['MensajeError'], true);
 			}
-		} catch (Exception $e) {
+		} else {
 			$response['result'] = false;
-			$response['message'] = 'Error al obtener la lista de departamentos';
+			$response['message'] = 'CAEX | ' . __('Error getting tracking id status.', 'wp-caex-woocommerce');
 		}
 		// obtener y devolver respuesta
         return $response;
