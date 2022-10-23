@@ -23,7 +23,6 @@ function dl_p_caex_load_textdomain() {
 add_action( 'plugins_loaded', 'dl_p_caex_load_textdomain' );
 
 define( 'CAEX_API_DEBUG_MODE', true);
-define( 'DL_DEBUG', true);
 define( 'CAEX_API_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CAEX_API_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
