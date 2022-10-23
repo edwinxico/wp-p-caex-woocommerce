@@ -3,9 +3,9 @@ msgstr ""
 "Project-Id-Version: Cargo Expreso - WooCommerce Invoicing\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-10-22 22:22+0000\n"
-"PO-Revision-Date: 2022-10-22 22:29+0000\n"
+"PO-Revision-Date: 2022-10-23 03:18+0000\n"
 "Last-Translator: \n"
-"Language-Team: Spanish (Spain)\n"
+"Language-Team: Español\n"
 "Language: es_ES\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "MIME-Version: 1.0\n"
@@ -20,11 +20,11 @@ msgstr ""
 msgid "%s email sent to the customer."
 msgstr "%s email enviado al cliente."
 
-#: wp-caex-woocommerce.php:66
+#: wp-caex-woocommerce.php:64
 msgid "Activate"
 msgstr "Activar"
 
-#: wp-caex-woocommerce.php:95
+#: wp-caex-woocommerce.php:93
 msgid "activate"
 msgstr "activar"
 
@@ -45,7 +45,7 @@ msgstr ""
 "Notificación Caex es enviada por medio de la acción personalizada \"Enviar "
 "Guía\" añadida a las órdenes de WooCommerce."
 
-#: admin/wp-actions.php:206
+#: admin/wp-actions.php:217
 msgid "CAEX Tracking Id Information"
 msgstr "Información de la Guía de CAEX"
 
@@ -53,7 +53,7 @@ msgstr "Información de la Guía de CAEX"
 msgid "Cancel previosly generated tracking ID"
 msgstr "Cancelar Guía generada previamente"
 
-#: admin/wp-actions.php:231
+#: admin/wp-actions.php:241
 msgid "Cancelled Tracking IDs"
 msgstr "Guías canceladas"
 
@@ -61,7 +61,7 @@ msgstr "Guías canceladas"
 msgid "Cargo Expreso - WooCommerce Invoicing"
 msgstr "Cargo Expreso - Guías para WooCommerce"
 
-#: wp-caex-woocommerce.php:87
+#: wp-caex-woocommerce.php:85
 msgid ""
 "Cargo Expreso - WooCommerce Invoicing requires WooCommerce and <a href=\"/wp-"
 "admin/plugin-install.php?tab=plugin-information&plugin=wc-guatemala\">"
@@ -82,6 +82,10 @@ msgstr "Digital Labs"
 #: admin/caex.php:18
 msgid "Digital Labs Plugins Licence Management"
 msgstr "Gestión de Licencias de Plugins de Digital Labs"
+
+#: admin/helpers/class-caex-api.php:182
+msgid "Error getting tracking id status."
+msgstr "Error al obtener el estado de la guía."
 
 #. Description of the plugin
 msgid ""
@@ -108,14 +112,18 @@ msgstr "https://digitallabs.agency"
 msgid "Invoice"
 msgstr "Guía"
 
-#: admin/wp-actions.php:134
+#: admin/wp-actions.php:145
 #, php-format
 msgid "Invoice status update requested by %s."
 msgstr "Actualización de la guía solicitada por %s."
 
-#: admin/wp-actions.php:214
+#: admin/wp-actions.php:225
 msgid "NumeroGuia"
 msgstr "NumeroGuia"
+
+#: admin/wp-filters.php:70
+msgid "On Route"
+msgstr "En ruta de entrega"
 
 #: admin/wp-ajax.php:94
 msgid "Order already had a tracking id."
@@ -130,23 +138,29 @@ msgctxt "placeholder"
 msgid "C/F"
 msgstr "C/F"
 
-#: wp-caex-woocommerce.php:95
+#: wp-caex-woocommerce.php:93
 msgid "Please"
 msgstr "Por favor"
 
-#: admin/wp-actions.php:213
+#: admin/wp-actions.php:224
 msgid "RecolleccionID"
 msgstr "RecolleccionID"
 
-#: wp-caex-woocommerce.php:76
+#: wp-caex-woocommerce.php:74
 msgid "Settings"
 msgstr "Ajustes"
 
-#: admin/wp-actions.php:219
+#: admin/wp-actions.php:229
 msgid "Status"
 msgstr "Estado"
 
-#: wp-caex-woocommerce.php:95
+#: admin/helpers/class-caex-api.php:94 admin/helpers/class-caex-api.php:129
+#: admin/helpers/class-caex-api.php:192 admin/helpers/class-caex-api.php:208
+#: admin/helpers/class-caex-api.php:224
+msgid "Successful request"
+msgstr "Solicitud exitosa"
+
+#: wp-caex-woocommerce.php:93
 msgid ""
 "the Cargo Expreso for WooCommerce Plugin Licence to start using this plugin!"
 msgstr ""
@@ -158,7 +172,7 @@ msgid "the plugin settings page and enter your Cargo Expreso API keys."
 msgstr ""
 "la página de ajustes del plugin e ingresa las claves de API de Cargo Expreso."
 
-#: admin/wp-actions.php:268
+#: admin/wp-actions.php:278
 msgid "Tracking ID"
 msgstr "Guía"
 
@@ -171,6 +185,10 @@ msgstr "Cancelación de guía solicitada por %s."
 #, php-format
 msgid "Tracking ID from Caex requested by %s."
 msgstr "Guía de Caex solicitada por %s."
+
+#: admin/helpers/class-caex-api.php:155
+msgid "Tracking id status update successfull."
+msgstr "Actualización de estado de la guía exitoso."
 
 #: admin/wp-actions.php:33
 msgid "Update tracking ID status"

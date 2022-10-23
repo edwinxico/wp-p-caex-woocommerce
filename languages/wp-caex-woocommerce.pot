@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Cargo Expreso - WooCommerce Invoicing\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-22 22:22+0000\n"
+"POT-Creation-Date: 2022-10-23 03:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -21,11 +21,11 @@ msgstr ""
 msgid "%s email sent to the customer."
 msgstr ""
 
-#: wp-caex-woocommerce.php:66
+#: wp-caex-woocommerce.php:64
 msgid "Activate"
 msgstr ""
 
-#: wp-caex-woocommerce.php:95
+#: wp-caex-woocommerce.php:93
 msgid "activate"
 msgstr ""
 
@@ -44,7 +44,7 @@ msgid ""
 "WooCommerce orders."
 msgstr ""
 
-#: admin/wp-actions.php:206
+#: admin/wp-actions.php:217
 msgid "CAEX Tracking Id Information"
 msgstr ""
 
@@ -52,7 +52,7 @@ msgstr ""
 msgid "Cancel previosly generated tracking ID"
 msgstr ""
 
-#: admin/wp-actions.php:231
+#: admin/wp-actions.php:241
 msgid "Cancelled Tracking IDs"
 msgstr ""
 
@@ -60,7 +60,7 @@ msgstr ""
 msgid "Cargo Expreso - WooCommerce Invoicing"
 msgstr ""
 
-#: wp-caex-woocommerce.php:87
+#: wp-caex-woocommerce.php:85
 msgid ""
 "Cargo Expreso - WooCommerce Invoicing requires WooCommerce and <a href=\"/wp-"
 "admin/plugin-install.php?tab=plugin-information&plugin=wc-guatemala\">"
@@ -77,6 +77,10 @@ msgstr ""
 
 #: admin/caex.php:18
 msgid "Digital Labs Plugins Licence Management"
+msgstr ""
+
+#: admin/helpers/class-caex-api.php:182
+msgid "Error getting tracking id status."
 msgstr ""
 
 #. Description of the plugin
@@ -102,13 +106,17 @@ msgstr ""
 msgid "Invoice"
 msgstr ""
 
-#: admin/wp-actions.php:134
+#: admin/wp-actions.php:145
 #, php-format
 msgid "Invoice status update requested by %s."
 msgstr ""
 
-#: admin/wp-actions.php:214
+#: admin/wp-actions.php:225
 msgid "NumeroGuia"
+msgstr ""
+
+#: admin/wp-filters.php:70
+msgid "On Route"
 msgstr ""
 
 #: admin/wp-ajax.php:94
@@ -124,23 +132,29 @@ msgctxt "placeholder"
 msgid "C/F"
 msgstr ""
 
-#: wp-caex-woocommerce.php:95
+#: wp-caex-woocommerce.php:93
 msgid "Please"
 msgstr ""
 
-#: admin/wp-actions.php:213
+#: admin/wp-actions.php:224
 msgid "RecolleccionID"
 msgstr ""
 
-#: wp-caex-woocommerce.php:76
+#: wp-caex-woocommerce.php:74
 msgid "Settings"
 msgstr ""
 
-#: admin/wp-actions.php:219
+#: admin/wp-actions.php:229
 msgid "Status"
 msgstr ""
 
-#: wp-caex-woocommerce.php:95
+#: admin/helpers/class-caex-api.php:94 admin/helpers/class-caex-api.php:129
+#: admin/helpers/class-caex-api.php:192 admin/helpers/class-caex-api.php:208
+#: admin/helpers/class-caex-api.php:224
+msgid "Successful request"
+msgstr ""
+
+#: wp-caex-woocommerce.php:93
 msgid ""
 "the Cargo Expreso for WooCommerce Plugin Licence to start using this plugin!"
 msgstr ""
@@ -149,7 +163,7 @@ msgstr ""
 msgid "the plugin settings page and enter your Cargo Expreso API keys."
 msgstr ""
 
-#: admin/wp-actions.php:268
+#: admin/wp-actions.php:278
 msgid "Tracking ID"
 msgstr ""
 
@@ -161,6 +175,10 @@ msgstr ""
 #: admin/wp-actions.php:67 admin/wp-ajax.php:118
 #, php-format
 msgid "Tracking ID from Caex requested by %s."
+msgstr ""
+
+#: admin/helpers/class-caex-api.php:155
+msgid "Tracking id status update successfull."
 msgstr ""
 
 #: admin/wp-actions.php:33
