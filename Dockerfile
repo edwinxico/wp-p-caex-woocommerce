@@ -29,6 +29,8 @@ RUN curl https://downloads.wordpress.org/plugin/woocommerce-product-generator.la
 
 RUN curl https://downloads.wordpress.org/plugin/storefront-visual-guide.latest-stable.zip -o storefront-visual-guide.zip
 
+RUN curl https://downloads.wordpress.org/plugin/debug-bar.latest-stable.zip -o debug-bar.zip
+
 RUN curl https://downloads.wordpress.org/theme/storefront.latest-stable.zip -o storefront.zip
 
 RUN unzip woocommerce.zip -d /var/www/html/wp-content/plugins/
@@ -41,9 +43,11 @@ RUN unzip storefront-visual-guide.zip -d /var/www/html/wp-content/plugins/
 
 RUN unzip woocommerce-product-generator.zip -d /var/www/html/wp-content/plugins/
 
+RUN unzip debug-bar.zip -d /var/www/html/wp-content/plugins/
+
 RUN unzip storefront.zip -d /var/www/html/wp-content/themes/
 
-RUN rm woocommerce.zip wc-guatemala.zip storefront.zip loco-translate.zip woocommerce-product-generator.zip storefront-visual-guide.zip
+RUN rm woocommerce.zip wc-guatemala.zip storefront.zip loco-translate.zip woocommerce-product-generator.zip storefront-visual-guide.zip debug-bar.zip
 
 COPY . /var/www/html/wp-content/plugins/wp-p-${PROJECT_NAME:-caex-woocommerce}
 
