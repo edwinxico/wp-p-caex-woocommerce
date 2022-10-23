@@ -125,14 +125,14 @@ function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
     $invoice_response = $caexApi->updateTrackingStatus($caex_tracking_to_update);
     if( !$invoice_response['result'] ) {
         // error ,agregar nota al pedido sobre la razón del error
-        $order->add_order_note( $invoice_response['message'] );
+        $order->add_order_note( "CAEX | " . $invoice_response['message'] );
         return;
     }
 
 	update_post_meta( $order->get_id(), '_wc_order_caex_tracking_status', $invoice_response['tracking_status'] );
 	
 	$message = sprintf( __( 'Invoice status update requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
-	$order->add_order_note( $message );
+	$order->add_order_note( "CAEX | " . $message );
 }
 add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_update_tracking_status_action' );
 

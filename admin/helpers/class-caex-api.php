@@ -13,8 +13,8 @@ class Caex_Api {
 		$this->url = "http://ws.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx";
 		$this->logger = new Util\Logger('dl-caex-api');
 		$this->debub_mode = false;
-		if( defined('CAEX_API_DEBUG_MODE') ) {
-			$this->debub_mode = CAEX_API_DEBUG_MODE;
+		if( defined('DL_DEBUG') ) {
+			$this->debub_mode = DL_DEBUG;
 		}
 
 	}
@@ -32,7 +32,7 @@ class Caex_Api {
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_ENCODING => '',
 			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
+			CURLOPT_TIMEOUT => 60,
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => 'POST',
@@ -44,14 +44,22 @@ class Caex_Api {
 		));
 
 		$response = curl_exec($curl);
+		if( curl_errno( $curl ) ) {
+			$this->logger->log( "Error en llamada api: " . curl_error( $curl ) );
+			return false;
+		}
+
 		curl_close($curl);
+
 		if ( $this->debub_mode ) {
 			$this->logger->log( "respuesta servicio: "  . print_r( $response, true) );
 		}
 		if( empty( $response ) ) {
 			return false;
 		}
-		return  $response;
+
+		$response_body = $this->get_response_body($response);
+		return  $response_body;
 	}
 
 	function get_response_body($response) {
@@ -88,7 +96,6 @@ class Caex_Api {
 		// crear objeto para llamada del helper del
 		$xml_request = $this->caex_api_helper->generate_tracking_request( $order, $this->caex_settings, $delivery_type, $delivery_date );
 		$api_response = $this->send_curl_request( $xml_request, 'GenerarGuia' );
-		$api_response = $this->get_response_body($api_response);
 		$this->logger->log( "respuesta array:" . print_r( $api_response, true ) );
 		// Hacer llamada a api para
 		try {
@@ -124,7 +131,6 @@ class Caex_Api {
 		// crear objeto para llamada del helper del
 		$xml_request = $this->caex_api_helper->generate_cancel_tracking_request( $caex_tracking_to_cancel, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'AnularGuia' );
-		$api_response = $this->get_response_body($api_response);
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
 		// Hacer llamada a api para
 		try {
@@ -146,14 +152,19 @@ class Caex_Api {
 
 	public function updateTrackingStatus( $caex_tracking_to_update ) {
 		$response['result'] = true;
-        $response['message'] = "Solicitud exitosa";
+        $response['message'] = __("Tracking id status update successfull.", 'wp-caex-woocommerce');
 
 		// crear objeto para llamada del helper del
 		$url = "https://tracking.caexlogistics.com/wsCAEXLogisticsSB/wsCAEXLogisticsSB.asmx";
 		$xml_request = $this->caex_api_helper->generate_update_tracking_request( $caex_tracking_to_update, $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerTrackingGuia', $url );
-		$api_response = $this->get_response_body($api_response);
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
+
+		if( defined( DL_DEBUG ) && DL_DEBUG ) {
+			$response['result'] = true;
+			$response['tracking_status'] = "Recolectado"; // Sin Recolectar, Recolectado, Almacenado en bodega, Entregado, Entregado - Liquidado, Devolución, Devolución Entregado, Anomalía, Ruta hacia bodega destino,
+			return $response;
+		}
 
 		// Hacer llamada a api para
 		if( isset( $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso'] ) ) {
@@ -166,7 +177,7 @@ class Caex_Api {
 			}
 		} else {
 			$response['result'] = false;
-			$response['message'] = 'CAEX | ' . __('Error getting tracking id status.', 'wp-caex-woocommerce');
+			$response['message'] = __('Error getting tracking id status.', 'wp-caex-woocommerce');
 		}
 		// obtener y devolver respuesta
         return $response;
@@ -180,7 +191,6 @@ class Caex_Api {
 		);
 		$xml_request = $this->caex_api_helper->generate_states_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoDepartamentos' );
-		$api_response = $this->get_response_body($api_response);
 		try {
 			$response['states'] = $api_response['ObtenerListadoDepartamentosResponse']['ResultadoObtenerDepartamentos']['ListadoDepartamentos']['Departamento'];
 		} catch (Exception $e) {
@@ -197,7 +207,6 @@ class Caex_Api {
 		);
 		$xml_request = $this->caex_api_helper->generate_municipalities_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoMunicipios' );
-		$api_response = $this->get_response_body($api_response);
 		try {
 			$response['municipalities'] = $api_response['ObtenerListadoMunicipiosResponse']['ResultadoObtenerMunicipios']['ListadoMunicipios']['Municipio'];
 		} catch (Exception $e) {
@@ -214,7 +223,6 @@ class Caex_Api {
 		);
 		$xml_request = $this->caex_api_helper->generate_towns_requext( $this->caex_settings );
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerListadoPoblados' );
-		$api_response = $this->get_response_body($api_response);
 		try {
 			$this->logger->log("towns: " . print_r($api_response, true));
 			$response['towns'] = $api_response['ObtenerListadoPobladosResponse']['ResultadoObtenerPoblados']['ListadoPoblados']['Poblado'];
