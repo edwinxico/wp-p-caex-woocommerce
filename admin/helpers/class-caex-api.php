@@ -160,13 +160,6 @@ class Caex_Api {
 		$api_response = $this->send_curl_request( $xml_request, 'ObtenerTrackingGuia', $url );
 		$this->logger->log("respuesta ya en array: " . print_r( $api_response, true) );
 
-		if( $this->debug_mode ) {
-			$response['result'] = true;
-			$response['tracking_status'] = "A"; // Sin Recolectar, Recolectado, Almacenado en bodega, Entregado, Entregado - Liquidado, Devolución, Devolución Entregado, Anomalía, Ruta hacia bodega destino,
-			$response['tracking_status_desc'] = "Entregado";
-			return $response;
-		}
-
 		// Hacer llamada a api para
 		if( isset( $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso'] ) ) {
 			$response['result'] = $api_response['ObtenerTrackingGuiaResponse']['ResultadoObtenerTrackingGuia']['ResultadoOperacion']['ResultadoExitoso']; 

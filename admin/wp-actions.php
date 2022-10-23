@@ -115,7 +115,7 @@ function dl_wc_process_order_meta_box_cancel_tracking_action( $order ) {
 add_action( 'woocommerce_order_action_wc_caex_cancel_tracking', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_cancel_tracking_action' );
 
 // Función para obtener estado de caex api y actualizar orden
-function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
+function dl_wc_update_tracking_status( $order ) {
 	$Logger = new Util\Logger('dl-caex');
     $caexApi = new Helpers\Caex_Api();
 
@@ -145,7 +145,7 @@ function dl_wc_process_order_meta_box_update_tracking_status_action( $order ) {
 	$message = sprintf( __( 'Invoice status update requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
 	$order->add_order_note( "CAEX | " . $message );
 }
-add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_update_tracking_status_action' );
+add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_update_tracking_status' );
 
 // Adding admin js script for ajax synchronization of states
 function dl_wc_caex_admin_scripts() {
@@ -296,3 +296,18 @@ function register_custom_order_status() {
     ) );
 }
 add_action( 'init', __NAMESPACE__ . '\\register_custom_order_status' );
+
+
+function dl_update_all_pending_orders_status() {
+	error_log("Cronjob inicio ejecutandose");
+	$orders = wc_get_orders( array(
+		'status' => array('wc-processing', 'wc-on-hold', 'wc-on-route', 'wc-pending'),
+		'limit' => -1
+	) );
+	foreach( $orders as $order ) {
+		error_log("cronjob ejecutandose x");
+		dl_wc_update_tracking_status( $order );
+	}
+	error_log("cronjob finalizó de ejecutarse");
+}
+add_action( 'dl_update_tracking_status', __NAMESPACE__ . '\\dl_update_all_pending_orders_status', 1, 3);
