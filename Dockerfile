@@ -17,7 +17,7 @@
 #
 FROM wordpress AS wordpress
 
-RUN apt update -y && apt install -y nano && apt install -y zip unzip
+RUN apt update -y && apt install -y nano && apt install -y zip unzip && apt install -y git
 
 RUN curl https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip -o woocommerce.zip
 
