@@ -55,6 +55,8 @@ class Caex_Helper {
                 error_log( "caex_state: " . print_r( $caex_state, true ) );
             }
             $caex_state_name = strtoupper( self::dl_strip_special_chars( $caex_state['Nombre'] ) );
+            $caex_state_code = $caex_state['Codigo'];
+
             foreach($dl_wc_gt_states as $dl_wc_gt_state ) {
                 $dl_wc_gt_state_name = strtoupper( self::dl_strip_special_chars( $dl_wc_gt_state->nombre_departamento ) );
                 if( $caex_state_name == $dl_wc_gt_state_name ) {
@@ -68,9 +70,12 @@ class Caex_Helper {
 
                     foreach( $caexApi_municipalities['municipalities'] as $caex_municipality_key => $caex_municipality ) {
                         $caex_municipality_name = strtoupper( self::dl_strip_special_chars( $caex_municipality['Nombre'] ) );
+                        $caex_municipality_code = $caex_municipality['Codigo'];
+                        $caex_municipality_departamento = $caex_municipality['CodigoDepto'];
+
                         foreach($dl_wc_gt_municipalities as $dl_wc_gt_municipality ) {
                             $dl_wc_gt_municipality_name = strtoupper( self::dl_strip_special_chars( $dl_wc_gt_municipality->nombre_municipio ) );
-                            if( $caex_municipality_name == $dl_wc_gt_municipality_name ) {
+                            if( $caex_municipality_name == $dl_wc_gt_municipality_name && $caex_state_code == $caex_municipality_departamento ) {
 
                                 $caexApi_municipalities['municipalities'][$caex_municipality_key]['found'] = true;
 
@@ -82,9 +87,13 @@ class Caex_Helper {
 
                                 foreach( $caexApi_towns['towns'] as $caex_town_key => $caex_town ) {
                                     $caex_town_name = strtoupper( self::dl_strip_special_chars( $caex_town['Nombre'] ) );
+                                    $caex_town_code = $caex_town['Codigo'];
+                                    $caex_town_municipio = $caex_town['CodigoMunicipio'];
+                                    $caex_town_departamento = $caex_town['CodigoDepto'];
+                                    
                                     foreach($dl_wc_gt_towns as $dl_wc_gt_town ) {
                                         $dl_wc_gt_town_name = strtoupper( self::dl_strip_special_chars( $dl_wc_gt_town->nombre_ciudad ) );
-                                        if( $caex_town_name == $dl_wc_gt_town_name ) {
+                                        if( $caex_town_name == $dl_wc_gt_town_name && $caex_municipality_code == $caex_town_municipio && $caex_state_code == $caex_town_departamento ) {
 
                                             $caexApi_towns['towns'][$caex_town_key]['found'] = true;
                                             // Si hace match, agregar caex_id a la localidad
@@ -104,8 +113,10 @@ class Caex_Helper {
     }
 
     public static function dl_strip_special_chars($cadena){
-		
+	
         $cadena = preg_replace('/\s+/', ' ', $cadena);
+
+        $cadena = trim( $cadena );
         //Reemplazamos la A y a
         $cadena = str_replace(
         array('Á', 'À', 'Â', 'Ä', 'á', 'à', 'ä', 'â', 'ª'),
