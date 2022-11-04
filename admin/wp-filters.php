@@ -73,3 +73,24 @@ function add_custom_order_status( $order_statuses ) {
   return $new_order_statuses;
 }
 add_filter( 'wc_order_statuses', __NAMESPACE__ . '\\add_custom_order_status' );
+
+
+/**
+ * @snippet       Tracking @ My Account Orders
+ * @author        Edwin Xico
+ * @compatible    WooCommerce 6
+ */   
+function dl_caex_add_tracking_btn( $actions, $order ) {
+  $caex_tracking = get_post_meta( $order->get_id(), '_wc_order_caex_tracking' );
+  $caex_last_action = get_post_meta( $order->get_id() , '_caex_last_action', true );
+  if( $caex_tracking && $caex_last_action != 'invoice_cancelled'  ) {
+    $caex_tracking = json_decode( $caex_tracking[count($caex_tracking)-1], true );
+    $actions['tracking'] = array(
+      'url' => 'https://www.cargoexpreso.com/tracking/?guia=' . $caex_tracking['NumeroGuia'],
+      'name' => __( 'Tracking', 'wp-caex-woocommerce' ),
+    );
+  }
+
+    return $actions;
+}
+add_filter( 'woocommerce_my_account_my_orders_actions', __NAMESPACE__ . '\\dl_caex_add_tracking_btn', 9999, 2 );

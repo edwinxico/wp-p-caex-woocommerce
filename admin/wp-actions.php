@@ -160,6 +160,12 @@ function dl_wc_caex_admin_scripts() {
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\\dl_wc_caex_admin_scripts' );
 
+/* Add client Scripts */
+function dl_p_cuotas_load_plugin_scripts() {
+	wp_enqueue_script('dl_wc_caex_js', CAEX_API_PLUGIN_URL . 'dist/assets/js/app.min.js', array( 'jquery' ), filemtime( CAEX_API_PLUGIN_URL . 'dist/assets/js/app.min.js' ), true);
+}
+add_action( 'wp_enqueue_scripts',__NAMESPACE__ . '\\dl_p_cuotas_load_plugin_scripts');
+
 function add_type_attribute($tag, $handle, $src) {
     // if not your script, do nothing and return original $tag
     if ( 'dl_wc_caex_admin_script' !== $handle ) {
