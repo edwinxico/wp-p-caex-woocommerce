@@ -94,3 +94,9 @@ function dl_caex_add_tracking_btn( $actions, $order ) {
     return $actions;
 }
 add_filter( 'woocommerce_my_account_my_orders_actions', __NAMESPACE__ . '\\dl_caex_add_tracking_btn', 9999, 2 );
+
+
+function wc_cart_totals_order_total_html() {
+  return '<strong>' . WC()->cart->get_total() . '</strong> ';
+}
+add_filter( 'woocommerce_cart_totals_order_total_html', __NAMESPACE__ . '\\wc_cart_totals_order_total_html', 9999, 2 );
