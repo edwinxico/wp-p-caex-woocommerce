@@ -49,7 +49,7 @@ add_action( 'woocommerce_order_actions', __NAMESPACE__ . '\\dl_wc_add_order_meta
  */
 function dl_wc_process_order_meta_box_request_tracking_action( $order, $delivery_type = 1 ) {
     $caexApi = new Helpers\Caex_Api();
-	$Logger = new Util\Logger('caex-woocommerce');
+	$Logger = new Util\Logger('dl-caex');
 	$Logger->log("caex-woocommerce: Requesting tracking id for order: " . $order->get_id() );
     $invoice_response = $caexApi->requestTracking($order, $delivery_type);
     if( !$invoice_response['result'] ) {
@@ -70,7 +70,8 @@ function dl_wc_process_order_meta_box_request_tracking_action( $order, $delivery
 
 function dl_wc_process_order_meta_box_request_tracking_action_1( $order ) {
 	global $woocommerce_settings;
-	error_log( "woocommerce_settings: " . get_option( 'wc_settings_tab_demo_title', true )  );
+	$Logger = new Util\Logger('dl-caex');
+	$Logger->log( "woocommerce_settings: " . get_option( 'wc_settings_tab_demo_title', true )  );
 	dl_wc_process_order_meta_box_request_tracking_action( $order );
 }
 add_action( 'woocommerce_order_action_wc_caex_request_tracking_1', __NAMESPACE__ . '\\dl_wc_process_order_meta_box_request_tracking_action_1' );
@@ -178,15 +179,17 @@ function add_type_attribute($tag, $handle, $src) {
 add_filter('script_loader_tag', __NAMESPACE__ . '\\add_type_attribute' , 10, 3);
 
 function dl_save_caex_town_id( $order_id ) {
-	error_log("entering saving method");
+	$Logger = new Util\Logger('dl-caex');
+	$Logger->log("entering saving method");
+
     $order = new \WC_Order( $order_id );
-	error_log("after creating order");
+	$Logger->log("after creating order");
     $order_shipping_postcode = $order->get_shipping_postcode();
     global $wpdb;
-	error_log("before wppdb request");
+	$Logger->log("before wppdb request");
 	$dl_wc_gt_town = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}dl_wc_gt_ciudad WHERE codigo_postal_ciudad = {$order_shipping_postcode}" );
 	if( $dl_wc_gt_town ) {
-		error_log("town found, returned caex town id");
+		$Logger->log("town found, returned caex town id");
 		update_post_meta( $order_id, '_caex_town_id', $dl_wc_gt_town->codigo_caex_ciudad );
 	}
 }
@@ -305,15 +308,16 @@ add_action( 'init', __NAMESPACE__ . '\\register_custom_order_status' );
 
 
 function dl_update_all_pending_orders_status() {
-	error_log("Cronjob inicio ejecutandose");
+	$Logger = new Util\Logger('dl-caex');
+	$Logger->log("Cronjob inicio ejecutandose");
 	$orders = wc_get_orders( array(
 		'status' => array('wc-processing', 'wc-on-hold', 'wc-on-route', 'wc-pending'),
 		'limit' => -1
 	) );
 	foreach( $orders as $order ) {
-		error_log("cronjob ejecutandose x");
+		$Logger->log("cronjob ejecutandose x");
 		dl_wc_update_tracking_status( $order );
 	}
-	error_log("cronjob finalizó de ejecutarse");
+	$Logger->log("cronjob finalizó de ejecutarse");
 }
 add_action( 'dl_update_tracking_status', __NAMESPACE__ . '\\dl_update_all_pending_orders_status', 1, 3);
