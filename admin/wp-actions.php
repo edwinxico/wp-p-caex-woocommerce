@@ -311,11 +311,13 @@ function dl_update_all_pending_orders_status() {
 	$Logger = new Util\Logger('dl-caex');
 	$Logger->log("Cronjob inicio ejecutandose");
 	$orders = wc_get_orders( array(
-		'status' => array('wc-processing', 'wc-on-hold', 'wc-on-route', 'wc-pending'),
 		'limit' => -1
 	) );
 	foreach( $orders as $order ) {
-		$Logger->log("cronjob ejecutandose x");
+		if( $order->get_status() == 'completed' ) {
+			continue;
+		}
+		$Logger->log("cronjob ejecutandose. Orden: " . $order->get_id() . " estado: " . $order->get_status() );
 		dl_wc_update_tracking_status( $order );
 	}
 	$Logger->log("cronjob finalizó de ejecutarse");
