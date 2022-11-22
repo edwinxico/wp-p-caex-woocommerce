@@ -107,3 +107,8 @@ function dl_p_caex_api() {
 
 }
 add_action( 'plugins_loaded', 'dl_p_caex_api' );
+
+add_action('init', function() {
+    remove_action( 'woocommerce_order_status_pending', 'wc_maybe_increase_stock_levels' );
+    add_action( 'woocommerce_order_status_pending', 'wc_maybe_reduce_stock_levels' );
+});
