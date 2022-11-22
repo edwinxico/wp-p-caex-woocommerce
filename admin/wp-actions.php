@@ -144,7 +144,7 @@ function dl_wc_update_tracking_status( $order ) {
 	update_post_meta( $order->get_id(), '_wc_order_caex_tracking', json_encode( $caex_tracking_to_update ) );
 	
 	$message = sprintf( __( 'Invoice status update requested by %s.', 'wp-caex-woocommerce' ), wp_get_current_user()->display_name );
-	$order->add_order_note( "CAEX | " . $message );
+	//$order->add_order_note( "CAEX | " . $message );
 }
 add_action( 'woocommerce_order_action_wc_caex_update_tracking_status', __NAMESPACE__ . '\\dl_wc_update_tracking_status' );
 
