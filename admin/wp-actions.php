@@ -314,7 +314,7 @@ function dl_update_all_pending_orders_status() {
 		'limit' => -1
 	) );
 	foreach( $orders as $order ) {
-		if( $order->get_status() == 'completed' ) {
+		if( $order->get_status() == 'completed' || !get_post_meta( $order->get_id(), '_wc_order_caex_tracking' ) ) {
 			continue;
 		}
 		$Logger->log("cronjob ejecutandose. Orden: " . $order->get_id() . " estado: " . $order->get_status() );
